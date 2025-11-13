@@ -1,0 +1,134 @@
+/* ============ Reset & Dasar ============ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f5f7f6;
+  color: #1f3d2f;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* ============ Navbar ============ */
+header {
+  background: #fff;
+  border-bottom: 1px solid #e3ede4;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1e5128;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 28px;
+}
+
+.nav-links a {
+  color: #1e5128;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #90c943;
+}
+
+/* ============ Tentang Kami ============ */
+.about-section {
+  background: url('https://i.ibb.co/k1L0Rzj/masjid-pattern.png') no-repeat bottom right;
+  background-size: 360px;
+  padding: 50px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 140px);
+}
+
+.about-content {
+  max-width: 1150px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.left h1 {
+  color: #214a30;
+  font-size: 1.6rem;
+  margin-bottom: 10px;
+}
+
+.left h2,
+.right h2 {
+  color: #1e5128;
+  font-size: 1.05rem;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+
+.left p,
+.right p {
+  color: #2f4a2f;
+  font-size: 0.93rem;
+}
+
+.left ol {
+  margin-left: 16px;
+  font-size: 0.93rem;
+  color: #2f4a2f;
+  line-height: 1.4;
+}
+
+.right p a {
+  color: #1e5128;
+  text-decoration: none;
+}
+
+.right p a:hover {
+  text-decoration: underline;
+}
+
+/* ============ Footer ============ */
+footer {
+  background-color: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 14px;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+}
+
+/* ============ Responsif ============ */
+@media (max-width: 900px) {
+  .about-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .about-section {
+    background-size: 250px;
+    padding: 40px 20px;
+  }
+}

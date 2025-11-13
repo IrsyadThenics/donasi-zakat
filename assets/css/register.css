@@ -1,0 +1,172 @@
+/* ==========================================
+   🌿 REGISTER PAGE STYLE - Fullscreen
+   ========================================== */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #dfede4;
+  color: #1f3d2f;
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* biar fix 1 layar penuh */
+  overflow: hidden; /* hilangkan scroll */
+}
+
+/* ================= HEADER ================= */
+header {
+  background: #fff;
+  border-bottom: 1px solid #dfede4;
+  flex-shrink: 0; /* biar header nggak ketarik */
+}
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #90c943;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  color: #2f4a2f;
+  text-decoration: none;
+  font-weight: 600;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: #90c943;
+  text-decoration: underline;
+}
+
+/* ================= MAIN ================= */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* ================= REGISTER BOX ================= */
+.register-container {
+  background: #fff;
+  padding: 40px 45px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(50, 110, 30, 0.12);
+  text-align: center;
+  width: 100%;
+  max-width: 430px;
+}
+
+.register-container h2 {
+  font-size: 1.9rem;
+  color: #204a30;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #445d44;
+  margin-bottom: 25px;
+}
+
+/* Role selection */
+.role-selection {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+.role-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: 2px solid #90c943;
+  background: #f0f7e7;
+  color: #214a2f;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.role-btn.active,
+.role-btn:hover {
+  background: #90c943;
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+input {
+  padding: 10px 14px;
+  border: 1px solid #c8dcc0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+input:focus {
+  border-color: #90c943;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(144, 201, 67, 0.25);
+}
+.btn-register {
+  background: #c0ff28;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 0;
+  font-weight: 700;
+  color: #1f3d2f;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+.btn-register:hover {
+  background: #a7df15;
+  color: #f3f9eb;
+}
+.login-text {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #465a45;
+}
+.login-text a {
+  color: #90c943;
+  text-decoration: none;
+  font-weight: 600;
+}
+.login-text a:hover {
+  text-decoration: underline;
+}
+
+/* ================= FOOTER ================= */
+footer {
+  background: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 14px 0;
+  font-size: 0.9rem;
+  flex-shrink: 0; /* biar footer tetap di bawah */
+}
