@@ -142,7 +142,7 @@ oci_free_statement($stmt_laporan);
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<title>Dashboard Donatur - Donasi Masjid & Amal</title>
 	<link rel="stylesheet" href="../assets/css/dashboard_donatur.css">-->
-	<style>
+	<!--<style>
 		.status-badge {
 			display: inline-block;
 			padding: 4px 12px;
@@ -266,7 +266,7 @@ oci_free_statement($stmt_laporan);
 		.report-details div:last-child {
 			margin-bottom: 0;
 		}
-	</style>
+	</style>-->
 </head>
 <body>
 	<!-- HEADER -->
@@ -275,7 +275,7 @@ oci_free_statement($stmt_laporan);
 			<h1><a href="../index.php">Donasi Masjid & Amal</a></h1>
 			<nav class="main-nav">
 				<a href="campaign.php" class="nav-link">Program</a>
-				<a href="campaign.php" class="nav-link">Donasi</a>
+				<a href="form_donasi.php" class="nav-link">Donasi</a>
 				<a href="#" class="nav-link">Dashboard</a>
 				<a href="../controller/logout_donaturController.php" class="nav-link logout">Logout</a>
 			</nav>
@@ -313,44 +313,58 @@ oci_free_statement($stmt_laporan);
 		<div class="donasi-box">
 			<h3 class="table-title">Riwayat Donasi</h3>
 			<table id="donationTable">
-				<thead>
-					<tr>
-						<th>Tanggal</th>
-						<th>Program</th>
-						<th>Jumlah</th>
-						<th>Status</th>
-						<th>Aksi</th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php
-					if (empty($riwayat_donasi)) {
-						echo "<tr><td colspan='5' style='text-align:center;color:#999;'>Belum ada riwayat donasi</td></tr>";
-					} else {
-						foreach ($riwayat_donasi as $donasi) {
-							$tanggal = !empty($donasi['TANGGAL_DONASI']) && strtotime($donasi['TANGGAL_DONASI']) !== false 
-								? date('Y-m-d', strtotime($donasi['TANGGAL_DONASI'])) 
-								: '-';
-							$status = $donasi['CAMPAIGN_STATUS'] ?? 'Tidak Ada';
-							$status_class = match($status) {
-								'Aktif' => 'status-aktif',
-								'Selesai' => 'status-terkumpul',
-								'Ditangguhkan' => 'status-diproses',
-								default => 'status-default'
-							};
-							echo "<tr>";
-							echo "<td>" . htmlspecialchars($tanggal) . "</td>";
-							echo "<td>" . htmlspecialchars($donasi['JUDUL_CAMPAIGN'] ?? '') . "</td>";
-							echo "<td>" . formatRupiah($donasi['JUMLAH_DONASI'] ?? 0) . "</td>";
-							echo "<td><span class='status-badge {$status_class}'>" . htmlspecialchars($status) . "</span></td>";
-							echo "<td><a href='detail1.php?id_campaign=" . urlencode($donasi['ID_CAMPAIGN'] ?? '') . "' class='btn-laporan'>Lihat</a></td>";
-							echo "</tr>";
-						}
-					}
-					?>
-				</tbody>
-			</table>
-		</div>
+				// ... Kode PHP sebelum tabel Riwayat Donasi ...
+
+// RIWAYAT DONASI TABLE
+// ...
+ <thead>
+  <tr>
+  <th>Tanggal</th>
+  <th>Program</th>
+  <th>Jumlah</th>
+  <th>Status Campaign</th>  <th>Aksi</th>
+  </tr>
+ </thead>
+ <tbody>
+  <?php
+  if (empty($riwayat_donasi)) {
+  echo "<tr><td colspan='5' style='text-align:center;color:#999;'>Belum ada riwayat donasi</td></tr>";
+  } else {
+  foreach ($riwayat_donasi as $donasi) {
+ $tanggal = !empty($donasi['TANGGAL_DONASI']) && strtotime($donasi['TANGGAL_DONASI']) !== false 
+ ? date('Y-m-d', strtotime($donasi['TANGGAL_DONASI'])) 
+ : '-';
+ $status = $donasi['CAMPAIGN_STATUS'] ?? 'Tidak Ada';
+ $status_class = match($status) {
+ 'Aktif' => 'status-aktif',
+ 'Selesai' => 'status-terkumpul',
+ 'Ditangguhkan' => 'status-diproses',
+ default => 'status-default'
+ };
+ echo "<tr>";
+ echo "<td>" . htmlspecialchars($tanggal) . "</td>";
+ echo "<td>" . htmlspecialchars($donasi['JUDUL_CAMPAIGN'] ?? '') . "</td>";
+ echo "<td>" . formatRupiah($donasi['JUMLAH_DONASI'] ?? 0) . "</td>";
+ echo "<td><span class='status-badge {$status_class}'>" . htmlspecialchars($status) . "</span></td>";
+ 
+                            // BARIS YANG DIMODIFIKASI: Kolom Aksi
+ 							echo "<td>";
+                            // Tombol Edit (arahkan ke halaman edit donasi)
+                            echo "<a href='edit_donasi.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#ffc107;color:#333;margin-right:5px;'>Edit</a>";
+                            // Tombol Hapus (arahkan ke controller hapus, gunakan konfirmasi JS)
+                            echo "<a href='../controller/hapus_donasiController.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#dc3545;margin-right:5px;' onclick='return confirm(\"Apakah Anda yakin ingin menghapus donasi ini? Aksi ini tidak dapat dibatalkan.\");'>Hapus</a>";
+                            // Tombol Lihat Detail (menggantikan link Lihat ke detail campaign)
+                            echo "<a href='detail_donasi.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#007bff;'>Detail</a>";
+                            echo "</td>";
+ 
+                            echo "</tr>";
+ }
+ }
+ ?>
+ </tbody>
+ </table>
+ </div>
+// ... Kode HTML dan Script sisanya ...
 
 		<!-- LAPORAN PENGGUNAAN DANA (TRANSPARANSI) -->
 		<div class="donasi-box" style="margin-top:18px;">
