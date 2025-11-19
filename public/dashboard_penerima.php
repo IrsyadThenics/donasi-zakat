@@ -1,227 +1,316 @@
 <?php
 /**
- * Dashboard Penerima - Menampilkan Top 5 Campaign untuk penerima
- * Database: Oracle
+ * Dashboard Penerima (Recipient Dashboard)
+ * Menampilkan ringkasan donasi, laporan, dan statistik penerima
+ * Database: Oracle (oci8)
  */
 session_start();
 require_once '../config/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+// Cek apakah user sudah login sebagai penerima
+$username_penerima = $_SESSION['username'] ?? null;
+
+if (!$username_penerima) {
+	header('Location: ../auth/login_penerima.php');
+	exit;
 }
 
-// Cek apakah donatur sudah login
-if (!isset($_SESSION['email'])) {
-    // Jika belum login, redirect ke halaman login
-    header('Location: ../auth/login_penerima.php');
-    exit;
+// Query untuk mendapatkan id_penerima dari username
+$id_penerima = null;
+$stmt_cek = oci_parse($conn, "SELECT id_penerima FROM penerima WHERE username = :username");
+if ($stmt_cek) {
+	oci_bind_by_name($stmt_cek, ':username', $username_penerima);
+	if (oci_execute($stmt_cek)) {
+		if ($row = oci_fetch_assoc($stmt_cek)) {
+			$id_penerima = intval($row['ID_PENERIMA']);
+		}
+	}
+	oci_free_statement($stmt_cek);
 }
 
-if (!isset($_SESSION['id_penerima'])) {
-    $_SESSION['id_penerima'] = 1;
-    $_SESSION['nama_penerima'] = 'Pengelola Penerima';
-    $_SESSION['email_penerima'] = 'penerima@example.com';
+if (!$id_penerima) {
+	header('Location: ../auth/login_penerima.php');
+	exit;
 }
 
 function formatRupiah($num) {
-    return 'Rp ' . number_format(floatval($num), 0, ',', '.');
+	return 'Rp ' . number_format(floatval($num), 0, ',', '.');
 }
 
-$penerima_id = $_SESSION['id_penerima'];
+// ========================================
+// QUERY STATISTIK PENERIMA
+// ========================================
 
-// Query Top 5 Campaign milik penerima
-$query_top_5 = "
-    SELECT 
-        c.id_campaign,
-        c.judul_campaign,
-        c.target_dana,
-        c.dana_terkumpul,
-        ROUND((NVL(c.dana_terkumpul,0) / NULLIF(c.target_dana,0)) * 100, 2) as progress_percentage,
-        c.tanggal_mulai,
-        c.tanggal_deadline,
-        c.status,
-        COUNT(d.id_donasi) as donation_count
-    FROM 
-        campaign c
-        LEFT JOIN donasi d ON c.id_campaign = d.id_campaign
-    WHERE
-        c.status = 'Aktif' AND c.id_penerima = :penerima_id
-    GROUP BY
-        c.id_campaign, c.judul_campaign, c.target_dana, c.dana_terkumpul,
-        c.tanggal_mulai, c.tanggal_deadline, c.status
-    ORDER BY 
-        c.dana_terkumpul DESC
-";
+// Total donasi masuk
+$total_donasi_masuk = 0;
+$total_penyaluran = 0;
+$campaign_aktif = 0;
+$total_laporan = 0;
 
-$stmt_top_5 = oci_parse($conn, $query_top_5);
-if (!$stmt_top_5) {
-    $err = oci_error($conn);
-    die('Error prepare top 5: ' . ($err['message'] ?? ''));
-}
-oci_bind_by_name($stmt_top_5, ':penerima_id', $penerima_id);
-if (!oci_execute($stmt_top_5)) {
-    $err = oci_error($stmt_top_5);
-    die('Error execute top 5: ' . ($err['message'] ?? ''));
-}
+$stmt_stat = oci_parse($conn, "
+	SELECT 
+		SUM(d.jumlah_donasi) as total_masuk,
+		COUNT(DISTINCT c.id_campaign) as campaign_count,
+		COUNT(DISTINCT lr.id_laporan) as laporan_count
+	FROM campaign c
+	LEFT JOIN donasi d ON c.id_campaign = d.id_campaign
+	LEFT JOIN laporan lr ON c.id_campaign = lr.id_campaign
+	WHERE c.id_penerima = :id_penerima
+");
 
-// Statistik untuk penerima: total donasi diterima, jumlah transaksi, rata-rata
-$query_stats = "
-    SELECT 
-        COUNT(d.id_donasi) as total_donations,
-        SUM(d.jumlah_donasi) as total_amount,
-        AVG(d.jumlah_donasi) as avg_amount
-    FROM donasi d
-    JOIN campaign c ON d.id_campaign = c.id_campaign
-    WHERE c.id_penerima = :penerima_id
-";
+if ($stmt_stat) {
+	oci_bind_by_name($stmt_stat, ':id_penerima', $id_penerima);
+	if (oci_execute($stmt_stat)) {
+		if ($row = oci_fetch_assoc($stmt_stat)) {
+			$total_donasi_masuk = floatval($row['TOTAL_MASUK'] ?? 0);
+			$campaign_aktif = intval($row['CAMPAIGN_COUNT'] ?? 0);
+			$total_laporan = intval($row['LAPORAN_COUNT'] ?? 0);
+		}
+	}
+}
+oci_free_statement($stmt_stat);
 
-$stmt_stats = oci_parse($conn, $query_stats);
-oci_bind_by_name($stmt_stats, ':penerima_id', $penerima_id);
-if (!oci_execute($stmt_stats)) {
-    $err = oci_error($stmt_stats);
-    die('Error execute stats: ' . ($err['message'] ?? ''));
-}
-$stats = oci_fetch_assoc($stmt_stats);
-if (!$stats) {
-    $stats = array('TOTAL_DONATIONS' => 0, 'TOTAL_AMOUNT' => 0, 'AVG_AMOUNT' => 0);
-}
+// Total penyaluran (dari laporan)
+$stmt_penyaluran = oci_parse($conn, "
+	SELECT SUM(total_dana_terkumpul) as total_penyaluran
+	FROM laporan
+	WHERE id_penerima = :id_penerima
+");
 
-// Count campaigns
-$query_campaign_count = "SELECT COUNT(*) AS TOTAL_CAMPAIGNS FROM campaign WHERE id_penerima = :penerima_id";
-$stmt_cnt = oci_parse($conn, $query_campaign_count);
-oci_bind_by_name($stmt_cnt, ':penerima_id', $penerima_id);
-if (oci_execute($stmt_cnt)) {
-    $cnt_row = oci_fetch_assoc($stmt_cnt);
-    $total_campaigns = $cnt_row['TOTAL_CAMPAIGNS'] ?? 0;
-} else {
-    $total_campaigns = 0;
+if ($stmt_penyaluran) {
+	oci_bind_by_name($stmt_penyaluran, ':id_penerima', $id_penerima);
+	if (oci_execute($stmt_penyaluran)) {
+		if ($row = oci_fetch_assoc($stmt_penyaluran)) {
+			$total_penyaluran = floatval($row['TOTAL_PENYALURAN'] ?? 0);
+		}
+	}
 }
+oci_free_statement($stmt_penyaluran);
+
+// ========================================
+// QUERY AKTIVITAS TERBARU (Campaign + Laporan)
+// ========================================
+$aktivitas_list = [];
+
+// Campaign terbaru
+$stmt_campaign = oci_parse($conn, "
+	SELECT 
+		c.id_campaign,
+		c.tanggal_mulai,
+		'Campaign' as jenis,
+		c.judul_campaign,
+		c.target_dana,
+		c.status,
+		NULL as laporan_id
+	FROM campaign c
+	WHERE c.id_penerima = :id_penerima
+	ORDER BY c.tanggal_mulai DESC
+");
+
+if ($stmt_campaign) {
+	oci_bind_by_name($stmt_campaign, ':id_penerima', $id_penerima);
+	if (oci_execute($stmt_campaign)) {
+		while ($row = oci_fetch_assoc($stmt_campaign)) {
+			$row['TANGGAL'] = $row['TANGGAL_MULAI'];
+			$row['NOMINAL'] = $row['TARGET_DANA'];
+			$aktivitas_list[] = $row;
+		}
+	}
+}
+oci_free_statement($stmt_campaign);
+
+// Laporan terbaru
+$stmt_laporan = oci_parse($conn, "
+	SELECT 
+		lr.id_laporan,
+		lr.tanggal_generate,
+		'Laporan' as jenis,
+		lr.judul_laporan,
+		lr.total_dana_terkumpul,
+		'Disetujui' as status,
+		lr.id_laporan as laporan_id
+	FROM laporan lr
+	WHERE lr.id_penerima = :id_penerima
+	ORDER BY lr.tanggal_generate DESC
+");
+
+if ($stmt_laporan) {
+	oci_bind_by_name($stmt_laporan, ':id_penerima', $id_penerima);
+	if (oci_execute($stmt_laporan)) {
+		while ($row = oci_fetch_assoc($stmt_laporan)) {
+			$row['TANGGAL'] = $row['TANGGAL_GENERATE'];
+			$row['NOMINAL'] = $row['TOTAL_DANA_TERKUMPUL'];
+			$aktivitas_list[] = $row;
+		}
+	}
+}
+oci_free_statement($stmt_laporan);
+
+// Sort by tanggal DESC
+usort($aktivitas_list, function($a, $b) {
+	$dateA = strtotime($a['TANGGAL'] ?? '');
+	$dateB = strtotime($b['TANGGAL'] ?? '');
+	return $dateB - $dateA;
+});
+
+// Limit to 10 most recent
+$aktivitas_list = array_slice($aktivitas_list, 0, 10);
 
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Penerima - Donasi Masjid & Amal</title>
-    
-    <link rel="stylesheet" href="../assets/css/dashboard_donatur.css">
+    <title>Dashboard Takmir</title>
+    <link rel="stylesheet" href="../assets/css/dashboard-penerima.css">
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <div class="header-title">
-                <h1>📊 Dashboard Penerima</h1>
-                <p>Selamat datang, <?php echo htmlspecialchars($_SESSION['nama_penerima'] ?? 'Penerima'); ?>!</p>
-            </div>
-            <div class="header-actions">
-                <a href="create_campaign.php" class="btn btn-primary">Kelola Campaign</a>
-                <a href="../controller/logout_penerimaController.php" class="btn btn-danger">Logout</a>
-            </div>
-        </header>
 
-        <div class="stats-container">
-            <div class="stat-card">
-                <h3>Total Penerimaan</h3>
-                <div class="value"><?php echo formatRupiah($stats['TOTAL_AMOUNT'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card secondary">
-                <h3>Jumlah Transaksi</h3>
-                <div class="value"><?php echo $stats['TOTAL_DONATIONS'] ?? 0; ?>x</div>
-            </div>
-            <div class="stat-card success">
-                <h3>Rata-rata Donasi</h3>
-                <div class="value"><?php echo formatRupiah($stats['AVG_AMOUNT'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card info">
-                <h3>Jumlah Campaign</h3>
-                <div class="value"><?php echo intval($total_campaigns); ?></div>
-            </div>
+<!-- ============================
+     HEADER (SAMA KAYA BERANDA)
+============================ -->
+<header>
+    <div class="nav-container">
+        <div class="logo">
+            <span class="icon">🕌</span>  
+            Manajemen Masjid
         </div>
 
-        <div class="section-title">
-            <h2>🏆 Top 5 Campaign Anda</h2>
-        </div>
-
-        <div class="campaign-container">
-            <?php
-            $rank = 1;
-            $has_campaigns = false;
-            while ($rank <= 5 && ($campaign = oci_fetch_assoc($stmt_top_5))) {
-                $has_campaigns = true;
-                $progress = min(max(floatval($campaign['PROGRESS_PERCENTAGE'] ?? 0), 0), 100);
-                ?>
-                <div class="campaign-card">
-                    <div class="campaign-header">
-                        <div class="campaign-rank">#<?php echo $rank; ?></div>
-                        <div class="campaign-name"><?php echo htmlspecialchars($campaign['JUDUL_CAMPAIGN']); ?></div>
-                        <div class="campaign-status">Status: <?php echo htmlspecialchars($campaign['STATUS']); ?></div>
-                    </div>
-
-                    <div class="campaign-body">
-                        <div class="campaign-info">
-                            <label>Target Dana:</label>
-                            <div><?php echo formatRupiah($campaign['TARGET_DANA'] ?? 0); ?></div>
-                        </div>
-
-                        <div class="campaign-info">
-                            <label>Dana Terkumpul:</label>
-                            <div><?php echo formatRupiah($campaign['DANA_TERKUMPUL'] ?? 0); ?></div>
-                        </div>
-
-                        <div class="progress-container">
-                            <div class="progress-label">
-                                <span>Progress</span>
-                                <span><?php echo $progress; ?>%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: <?php echo $progress; ?>%"></div>
-                            </div>
-                        </div>
-
-                        <div class="campaign-info">
-                            <label>Periode:</label>
-                            <div>
-                                <?php
-                                $start = (!empty($campaign['TANGGAL_MULAI']) && strtotime($campaign['TANGGAL_MULAI']) !== false)
-                                    ? date('d/m/Y', strtotime($campaign['TANGGAL_MULAI']))
-                                    : '-';
-                                $end = (!empty($campaign['TANGGAL_DEADLINE']) && strtotime($campaign['TANGGAL_DEADLINE']) !== false)
-                                    ? date('d/m/Y', strtotime($campaign['TANGGAL_DEADLINE']))
-                                    : '-';
-                                echo "$start - $end";
-                                ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="campaign-footer">
-                        <span class="donation-count">👥 <?php echo intval($campaign['DONATION_COUNT'] ?? 0); ?> Donatur</span>
-                        <a href="detail1.php?id_campaign=<?php echo urlencode($campaign['ID_CAMPAIGN'] ?? ''); ?>" class="btn-donate">Lihat</a>
-                    </div>
-                </div>
-                <?php
-                $rank++;
-            }
-
-            if (!$has_campaigns) {
-                echo '<div class="empty-state"><p>Belum ada campaign Anda yang aktif saat ini.</p></div>';
-            }
-            ?>
-        </div>
-
-        <footer>
-            <p>&copy; 2025 Donasi Masjid & Amal — Transparansi Keuangan untuk Semua</p>
-        </footer>
+        <ul class="nav-links">
+            <li><a href="index.php">Beranda</a></li>
+            <li><a href="tentang.php">Tentang</a></li>
+            <li><a href="kontak.php">Kontak</a></li>
+            <li><a href="#" class="active">Dashboard</a></li>
+        </ul>
     </div>
+</header>
+
+<!-- WRAPPER -->
+<div class="wrap">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h3>Menu Admin</h3>
+
+        <div class="side-list">
+            <a href="dashboard_penerima.php" class="active">Dashboard</a>
+            <a href="crud-campaign.php">Kelola Campaign</a>
+            <a href="crud-donasi.php">Kelola Donasi</a>
+            <a href="crud-donatur.php">Kelola Donatur</a>
+            <a href="crud-laporan.php">Kelola Laporan</a>
+            <a href="../controller/logout_penerimaController.php">Logout</a>
+        </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+        <div class="page-head">
+            <h1>Dashboard Takmir</h1>
+            <p class="muted">Ringkasan aktivitas dan pengelolaan masjid</p>
+        </div>
+
+        <!-- CARDS -->
+        <div class="cards">
+            <div class="card">
+                <h3>Total Donasi Masuk</h3>
+                <div class="val"><?php echo formatRupiah($total_donasi_masuk); ?></div>
+            </div>
+
+            <div class="card">
+                <h3>Total Penyaluran</h3>
+                <div class="val"><?php echo formatRupiah($total_penyaluran); ?></div>
+            </div>
+
+            <div class="card">
+                <h3>Campaign Aktif</h3>
+                <div class="val"><?php echo htmlspecialchars($campaign_aktif); ?> Program</div>
+            </div>
+
+            <div class="card">
+                <h3>Total Laporan Donatur</h3>
+                <div class="val"><?php echo htmlspecialchars($total_laporan); ?> Laporan</div>
+            </div>
+        </div>
+
+        <!-- TABEL -->
+        <div class="panel">
+            <h2>Aktivitas & Laporan Terbaru</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jenis</th>
+                        <th>Judul</th>
+                        <th>Nominal</th>
+                        <th>Status</th>
+                        
+                    </tr>
+
+                    <?php
+                    if (empty($aktivitas_list)) {
+                        echo "<tr><td colspan='6' style='text-align:center;color:#999;'>Belum ada aktivitas</td></tr>";
+                    } else {
+                        foreach ($aktivitas_list as $ak) {
+                            $tanggal = !empty($ak['TANGGAL']) && strtotime($ak['TANGGAL']) !== false 
+                                ? date('Y-m-d', strtotime($ak['TANGGAL'])) 
+                                : '-';
+                            $jenis = htmlspecialchars($ak['JENIS'] ?? '');
+                            $judul = htmlspecialchars($ak['JENIS'] === 'Campaign' ? ($ak['JUDUL_CAMPAIGN'] ?? '') : ($ak['JUDUL_LAPORAN'] ?? ''));
+                            $nominal = !empty($ak['NOMINAL']) ? formatRupiah($ak['NOMINAL']) : '-';
+                            $status_class = match($ak['STATUS'] ?? 'Menunggu') {
+                                'Aktif' => 'active',
+                                'Disetujui' => 'active',
+                                'Selesai' => 'closed',
+                                'Ditangguhkan' => 'closed',
+                                default => 'closed'
+                            };
+                            $status_text = $ak['STATUS'] ?? 'Menunggu';
+                            
+                            echo "<tr>";
+                            echo "<td>" . htmlspecialchars($tanggal) . "</td>";
+                            echo "<td>" . htmlspecialchars($jenis) . "</td>";
+                            echo "<td>" . htmlspecialchars($judul) . "</td>";
+                            echo "<td>" . htmlspecialchars($nominal) . "</td>";
+                            echo "<td><span class='tag {$status_class}'>" . htmlspecialchars($status_text) . "</span></td>";
+                            echo "<td>";
+                            
+                            //if ($ak['JENIS'] === 'Campaign') {
+                              //  echo "<a href='#' class='btn secondary small' style='text-decoration:none;'>Edit</a> ";
+                                //echo "<a href='#' class='btn danger small' style='text-decoration:none;'>Hapus</a>";
+                            //} else {
+                              ////  echo "<a href='#' class='btn secondary small' style='text-decoration:none;'>Edit</a> ";
+                                //echo "<a href='#' class='btn danger small' style='text-decoration:none;'>Hapus</a> ";
+                                //echo "<a href='#' class='btn small' style='text-decoration:none;'>Verifikasi</a>";
+                            //}
+                            
+                           // echo "</td>";
+                            //echo "</tr>";
+                        }
+                    }
+                    ?>
+
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- ============================
+     FOOTER (SAMA KAYA BERANDA)
+============================ -->
+<footer>
+    © 2025 Masjid Al-Falah. Semua Hak Dilindungi.
+</footer>
+<script src="../assets/js/dashboard_penerima.js"></script>
+
 </body>
 </html>
 
 <?php
-oci_free_statement($stmt_top_5);
-oci_free_statement($stmt_stats);
-oci_free_statement($stmt_cnt);
 oci_close($conn);
 ?>

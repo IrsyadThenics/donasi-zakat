@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Donasi</title>
+    <link rel="stylesheet" href="../assets/css/crud-donasi.css">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="nav-container">
+    <h2 style="color:#4CAF50;">Takmir</h2>
+    <ul class="nav-links">
+      <li><a href="dashboard_penerima.php">Dashboard</a></li>
+      <li><a href="crud-campaign.php">Campaign</a></li>
+      <li><a class="active" href="crud-donasi.php">Donasi</a></li>
+      <li><a href="crud-donatur.php">Donatur</a></li>
+      <li><a href="../controller/logout_penerimaController.php">Logout</a></li>
+    </ul>
+  </div>
+</header>
+
+
+<!-- MAIN WRAP -->
+<div class="wrap">
+
+    <!-- SIDEBAR -->
+   <div class="sidebar">
+        <h3>Menu Admin</h3>
+        <div class="side-list">
+            <a href="dashboard_penerima.php">Dashboard</a>
+            <a href="crud-campaign.php">Kelola Campaign</a>
+            <a class="active" href="crud-donasi.php">Kelola Donasi</a>
+            <a href="crud-donatur.php">Kelola Donatur</a>
+            <a href="crud-laporan.php">Kelola Laporan</a>
+
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <div class="page-head">
+            <h1>Kelola Donasi</h1>
+            <p>Daftar seluruh transaksi donasi</p>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="cards">
+            <div class="card"><h4>Total Donasi</h4><div class="val">Rp 20.000.000</div></div>
+            <div class="card"><h4>Donasi Hari Ini</h4><div class="val">Rp 1.250.000</div></div>
+            <div class="card"><h4>Donatur Aktif</h4><div class="val">120</div></div>
+            <div class="card"><h4>Campaign Didukung</h4><div class="val">15</div></div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <input type="text" class="input-search" placeholder="Cari donasi...">
+            <select class="filter-select">
+                <option>Semua Metode</option>
+                <option>Transfer</option>
+                <option>Offline</option>
+                <option>QRIS</option>
+            </select>
+            <button class="btn secondary">Export CSV</button>
+        </div>
+
+        <!-- TABLE -->
+        <div class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Donatur</th>
+                            <th>Campaign</th>
+                            <th>Jumlah</th>
+                            <th>Tanggal</th>
+                            <th>Metode</th>
+                            <th>Status</th>
+                            <th>Bukti</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Ahmad Fauzi</td>
+                            <td>Renovasi Tempat Wudhu</td>
+                            <td>Rp 250.000</td>
+                            <td>2025-02-12</td>
+                            <td>Transfer</td>
+                            <td><span class="tag active">Valid</span></td>
+                            <td><img src="img/bukti1.jpg" class="thumb"></td>
+                            <td>
+                                <button class="btn small secondary">Detail</button>
+                                <button class="btn small danger">Hapus</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Nur Laili</td>
+                            <td>Pengadaan Al-Qur'an</td>
+                            <td>Rp 100.000</td>
+                            <td>2025-02-11</td>
+                            <td>QRIS</td>
+                            <td><span class="tag active">Valid</span></td>
+                            <td><img src="img/bukti2.jpg" class="thumb"></td>
+                            <td>
+                                <button class="btn small secondary">Detail</button>
+                                <button class="btn small danger">Hapus</button>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Takmir Masjid — Sistem Donasi</p>
+</footer>
+
+</body>
+</html>

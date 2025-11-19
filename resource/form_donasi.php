@@ -8,13 +8,29 @@
 session_start();
 require_once '../config/db.php';
 
-// Simple rupiah formatter
 function formatRupiah($num) {
 	return 'Rp ' . number_format(floatval($num), 0, ',', '.');
 }
 
 $message = '';
 $message_class = '';
+
+// Dapatkan id_donatur dari session email (jika ada)
+$email_donatur = $_SESSION['email'] ?? null;
+$id_donatur = null;
+
+if ($email_donatur) {
+	$stmt_cek = oci_parse($conn, "SELECT id_donatur FROM donatur WHERE email = :email");
+	if ($stmt_cek) {
+		oci_bind_by_name($stmt_cek, ':email', $email_donatur);
+		if (oci_execute($stmt_cek)) {
+			if ($row = oci_fetch_assoc($stmt_cek)) {
+				$id_donatur = intval($row['ID_DONATUR']);
+			}
+		}
+		oci_free_statement($stmt_cek);
+	}
+}
 
 // Load campaigns for dropdown
 $campaigns = [];
@@ -23,11 +39,8 @@ if ($stmt_c && oci_execute($stmt_c)) {
 	while ($row = oci_fetch_assoc($stmt_c)) {
 		$campaigns[] = $row;
 	}
-} else {
-	// ignore; empty list
 }
 
-// If id_campaign passed by GET, load that campaign's details
 $selected_campaign = null;
 if (!empty($_GET['id_campaign'])) {
 	$idc = $_GET['id_campaign'];
@@ -39,19 +52,14 @@ if (!empty($_GET['id_campaign'])) {
 	}
 }
 
-// Handle POST submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	// Basic CSRF could be added later
 	$id_campaign = $_POST['id_campaign'] ?? '';
 	$jumlah = isset($_POST['jumlah']) ? str_replace([',','.' ], ['',''], $_POST['jumlah']) : '';
 	$jumlah = floatval($jumlah);
 	$metode = trim($_POST['metode'] ?? '');
 	$pesan = trim($_POST['pesan'] ?? '');
-
-	// If user logged in, pick id_donatur, otherwise null (anonymous)
-	$id_donatur = $_SESSION['id_donatur'] ?? null;
-
-	// Validation
+	$is_anonim = ($id_donatur === null) ? 1 : 0;
+	
 	if (empty($id_campaign)) {
 		$message = 'Pilih campaign tujuan donasi.';
 		$message_class = 'error';
@@ -59,41 +67,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$message = 'Masukkan jumlah donasi yang valid (lebih besar dari 0).';
 		$message_class = 'error';
 	} else {
-		// Insert donation and update campaign dana_terkumpul in a transaction
 		$ok = true;
-		// Prepare insert into donasi; assume table has columns: id_campaign, id_donatur, jumlah_donasi, tanggal_donasi, metode, pesan
-		$sql_ins = "INSERT INTO donasi (id_campaign, id_donatur, jumlah_donasi, tanggal_donasi, metode, pesan) VALUES (:idc, :idd, :jml, SYSDATE, :met, :pes)";
+		
+		// Insert donasi (id_donatur boleh NULL jika anonim, gunakan is_anonim flag untuk menandai)
+		$sql_ins = "INSERT INTO donasi (id_donasi, id_campaign, id_donatur, jumlah_donasi, tanggal_donasi, is_anonim, metode, pesan) VALUES (seq_donasi.nextval, :idc, :idd, :jml, SYSDATE, :is_anon, :met, :pes)";
 		$stmt_ins = oci_parse($conn, $sql_ins);
-		if (!$stmt_ins) {
-			$ok = false;
-			$err = oci_error($conn);
-			$message = 'Gagal mempersiapkan penyimpanan donasi: ' . ($err['message'] ?? '');
-			$message_class = 'error';
-		} else {
-			// bind
+		if ($stmt_ins) {
 			oci_bind_by_name($stmt_ins, ':idc', $id_campaign);
-			// allow null for id_donatur
-			if ($id_donatur === null) {
-				// bind null by binding a PHP null variable
-				$null = null;
-				oci_bind_by_name($stmt_ins, ':idd', $null);
-			} else {
-				oci_bind_by_name($stmt_ins, ':idd', $id_donatur);
-			}
+			oci_bind_by_name($stmt_ins, ':idd', $id_donatur);
 			oci_bind_by_name($stmt_ins, ':jml', $jumlah);
+			oci_bind_by_name($stmt_ins, ':is_anon', $is_anonim);
 			oci_bind_by_name($stmt_ins, ':met', $metode);
 			oci_bind_by_name($stmt_ins, ':pes', $pesan);
-
 			if (!@oci_execute($stmt_ins, OCI_NO_AUTO_COMMIT)) {
 				$ok = false;
 				$err = oci_error($stmt_ins);
 				$message = 'Gagal menyimpan donasi: ' . ($err['message'] ?? '');
 				$message_class = 'error';
 			}
+		} else {
+			$ok = false;
+			$message = 'Gagal mempersiapkan query.';
+			$message_class = 'error';
 		}
-
+		
 		if ($ok) {
-			// Update campaign dana_terkumpul
 			$sql_upd = "UPDATE campaign SET dana_terkumpul = NVL(dana_terkumpul,0) + :jml WHERE id_campaign = :idc";
 			$stmt_upd = oci_parse($conn, $sql_upd);
 			if ($stmt_upd) {
@@ -107,33 +105,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				}
 			} else {
 				$ok = false;
-				$err = oci_error($conn);
-				$message = 'Gagal mempersiapkan update campaign: ' . ($err['message'] ?? '');
+				$message = 'Gagal mempersiapkan update.';
 				$message_class = 'error';
 			}
 		}
-
+		
 		if ($ok) {
-			// Commit
 			if (oci_commit($conn)) {
-				$message = 'Terima kasih! Donasi Anda berhasil disimpan.';
+				$message = 'Terima kasih! Donasi berhasil disimpan.';
 				$message_class = 'success';
-				// reload selected campaign data
 				foreach ($campaigns as &$c) {
 					if (strval($c['ID_CAMPAIGN']) === strval($id_campaign)) {
-						// update local copy
 						$c['DANA_TERKUMPUL'] = ($c['DANA_TERKUMPUL'] ?? 0) + $jumlah;
 						$selected_campaign = $c;
 						break;
 					}
 				}
 			} else {
-				$err = oci_error($conn);
-				$message = 'Gagal menyimpan transaksi (commit): ' . ($err['message'] ?? '');
+				$message = 'Gagal commit transaksi.';
 				$message_class = 'error';
 			}
 		} else {
-			// rollback on error
 			@oci_rollback($conn);
 		}
 	}
@@ -149,7 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	<title>Form Donasi - Donasi Masjid & Amal</title>
 	<link rel="stylesheet" href="../assets/css/index.css">
 	<style>
-		/* Minimal inline styles for the form */
 		.form-card{max-width:720px;margin:20px auto;padding:20px;border:1px solid #e2e2e2;border-radius:8px;background:#fff}
 		label{display:block;margin-bottom:6px;font-weight:600}
 		input[type=text], input[type=number], textarea, select{width:100%;padding:10px;margin-bottom:12px;border:1px solid #ccc;border-radius:4px}
@@ -204,11 +195,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 			<div style="display:flex;gap:12px;align-items:center">
 				<button type="submit" class="btn">Donasi Sekarang</button>
-				<a href="dashboard_donatur.php" class="btn" style="background:#6c757d">Kembali</a>
+				<a href="campaign.php" class="btn" style="background:#6c757d">Kembali</a>
 			</div>
 		</form>
 
-		<p style="margin-top:12px;font-size:0.9rem;color:#666">Catatan: Jika Anda belum login, donasi akan dicatat sebagai anonim. Untuk riwayat donasi, silakan login terlebih dahulu.</p>
+		<p style="margin-top:12px;font-size:0.9rem;color:#666">Catatan: Donasi dapat dilakukan dengan atau tanpa login. Jika login, donasi akan tercatat atas nama Anda. Jika tidak login, donasi akan tercatat sebagai anonim.</p>
 	</div>
 </body>
 </html>

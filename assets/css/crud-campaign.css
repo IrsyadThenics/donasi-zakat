@@ -1,0 +1,165 @@
+/* ========================= GLOBAL ========================= */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: #f5f7f8;
+    color: #333;
+}
+
+/* ========================= HEADER ========================= */
+header {
+  background: #fff;
+  border-bottom: 1px solid #dfede4;
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  color: #2f4a2f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-links a.active { color: #90c943; }
+
+/* ========================= FOOTER ========================= */
+footer {
+  background: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 20px 10px;
+  margin-top: 40px;
+}
+
+/* ========================= WRAPPER ========================= */
+.wrap {
+    display: flex;
+    max-width: 1300px;
+    margin: 25px auto;
+    gap: 25px;
+    padding: 0 20px;
+}
+
+/* ========================= SIDEBAR ========================= */
+.sidebar {
+    width: 230px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    border-right: 1px solid #e5e5e5;
+}
+
+.side-list a {
+    display: block;
+    padding: 10px;
+    border-radius: 8px;
+    color: #444;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.side-list a:hover { background: #ecf9ec; }
+.side-list .active {
+    background: #4CAF50;
+    color: #fff;
+}
+
+/* ========================= CONTENT ========================= */
+.content { flex: 1; padding: 25px; }
+
+.page-head h1 { margin-bottom: 5px; }
+
+/* ========================= CARDS ========================= */
+.cards {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap: 18px;
+}
+
+.card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    border-left: 4px solid #4CAF50;
+}
+
+.card .val { font-size: 20px; margin-top: 6px; font-weight: bold; }
+
+/* ========================= TOOLBAR ========================= */
+.toolbar {
+    margin-top: 25px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.input-search,
+.filter-select {
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* ========================= PANEL + TABLE ========================= */
+.panel {
+    margin-top: 25px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+table { width: 100%; border-collapse: collapse; }
+th { background: #f0f0f0; padding: 12px; text-align: left; }
+td { padding: 12px; border-bottom: 1px solid #eee; }
+
+.thumb {
+    width: 70px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+/* ========================= STATUS TAG ========================= */
+.tag {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #fff;
+}
+.tag.active { background: #27ae60; }
+.tag.closed { background: #e74c3c; }
+
+/* ========================= BUTTONS ========================= */
+.btn {
+    background: #4CAF50;
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn.small { padding: 6px 12px; font-size: 13px; }
+.btn.secondary { background: #3498db; }
+.btn.danger { background: #e74c3c; }

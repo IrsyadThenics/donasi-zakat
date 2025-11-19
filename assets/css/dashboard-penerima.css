@@ -1,0 +1,335 @@
+/* ============================
+   GLOBAL (ikuti beranda)
+============================ */
+/* ==================== GLOBAL LAYOUT ==================== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+}
+
+/* HEADER */
+.top-header {
+    background: #ffffff;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.top-header .logo {
+    font-size: 20px;
+    font-weight: bold;
+    color: #2f4a2f;
+}
+
+.top-nav a {
+    margin-left: 18px;
+    color: #333;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.top-nav .active {
+    color: #4CAF50;
+    font-weight: 700;
+}
+
+/* ==================== MAIN GRID ==================== */
+.container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    padding: 0;
+}
+
+/* SIDEBAR */
+.sidebar {
+    background: #ffffff;
+    height: 100vh;
+    padding: 25px;
+    border-right: 1px solid #ddd;
+    position: sticky;
+    top: 70px;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+    color: #2f4a2f;
+}
+
+.sidebar ul {
+    padding: 0;
+    list-style: none;
+    margin-top: 15px;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    padding: 8px 10px;
+    display: block;
+    border-radius: 6px;
+}
+
+.sidebar ul li a.active,
+.sidebar ul li a:hover {
+    background: #4CAF50;
+    color: white;
+}
+
+/* CONTENT */
+.content {
+    padding: 35px;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    padding: 15px;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+    margin-top: 30px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* ⛔ ANTI SCROLL HORIZONTAL */
+}
+
+body {
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    background: #f5f7f8;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================
+   HEADER (SAMA PERSIS BERANDA)
+============================ */
+header {
+  background: #fff;
+  border-bottom: 1px solid #dfede4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  color: #2f4a2f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav-links a.active {
+  color: #90c943;
+}
+
+/* ============================
+   FOOTER (SAMA BERANDA)
+============================ */
+footer {
+  background: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 20px 10px;
+  margin-top: auto;
+  width: 100%;
+}
+
+/* ============================
+   LAYOUT MAIN WRAPPER
+============================ */
+.wrap {
+    display: flex;
+    width: 100%;
+    max-width: 1300px;
+    margin: 25px auto;
+    gap: 25px;
+    padding: 0 20px;
+    overflow-x: hidden; /* tambahan anti scroll */
+}
+
+/* ============================
+   SIDEBAR
+============================ */
+.sidebar {
+    width: 230px;
+    background: #ffffff;
+    min-height: calc(100vh - 100px);
+    padding: 20px;
+    border-right: 1px solid #e5e5e5;
+    border-radius: 12px;
+}
+
+.sidebar h3 {
+    margin-bottom: 16px;
+}
+
+.side-list a {
+    display: block;
+    padding: 10px;
+    margin-bottom: 6px;
+    border-radius: 8px;
+    color: #444;
+    font-weight: 600;
+}
+
+.side-list a:hover {
+    background: #ecf9ec;
+}
+
+.side-list .active {
+    background: #4CAF50;
+    color: white;
+}
+
+/* ============================
+   CONTENT
+============================ */
+.content {
+    flex: 1;
+    padding: 25px;
+    overflow-x: hidden; 
+}
+
+.page-head h1 {
+    margin-bottom: 5px;
+}
+
+/* ============================
+   CARDS
+============================ */
+.cards {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+    gap: 15px;
+}
+
+.card {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 4px solid #4CAF50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.card .val {
+    margin-top: 6px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* ============================
+   TABLE PANEL
+============================ */
+.panel {
+    margin-top: 25px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 1px 4px rgba(0,0,0,0.07);
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto; /* tabel tetap aman */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f0f0f0;
+    padding: 12px;
+    text-align: left;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.thumb {
+    width: 70px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* STATUS TAG */
+.tag {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: white;
+}
+
+.tag.active { background: #27ae60; }
+.tag.closed { background: #e74c3c; }
+
+/* ============================
+   BUTTON
+============================ */
+.btn {
+    background: #4CAF50;
+    border: none;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn.secondary { background: #3498db; }
+.btn.danger { background: #e74c3c; }
+.btn.small { padding: 5px 10px; font-size: 13px; }
+
+/* ============================
+   RESPONSIVE
+============================ */
+@media (max-width: 900px) {
+    .wrap { 
+        flex-direction: column; 
+        overflow-x: hidden;
+    }
+    .sidebar { 
+        width: 100%; 
+        min-height: auto; 
+    }
+}

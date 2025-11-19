@@ -15,4 +15,5 @@ apa  saja yang kurang di web sistem-donasi
 7. membetulkan tombol donasi yang ada di dashboard donatur
 8. membetulkan validasi yang ada di dashboard donator dan penerima yang kalua pathnya di ganti bisa langsung masuk (sudah dikerjakan)
 9. logout controller belum ada isinya (sudah dikerjakan)
-
+10. penerima tidak ada top 5 tapi diksih crud
+11. crud laporan

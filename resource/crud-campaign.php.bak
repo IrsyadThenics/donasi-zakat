@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Campaign</title>
+
+    <link rel="stylesheet" href="../assets/css/crud-campaign.css">
+</head>
+
+<body>
+
+<!-- ========== HEADER (SAMA DONATUR) ========== -->
+<header>
+  <div class="nav-container">
+    <h2 style="color:#4CAF50;">Takmir</h2>
+    <ul class="nav-links">
+      <li><a href="dashboard_penerima.php">Dashboard</a></li>
+      <li><a class="active" href="crud-campaign.php">Campaign</a></li>
+      <li><a href="crud-donasi.php">Donasi</a></li>
+      <li><a href="crud-donatur.php">Donatur</a></li>
+      <li><a href="../controller/logout_penerimaController.php">Logout</a></li>
+    </ul>
+  </div>
+</header>
+
+
+<!-- ========== WRAPPER ========== -->
+<div class="wrap">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h3>Menu Admin</h3>
+        <div class="side-list">
+            <a href="dashboard_penerima.php">Dashboard</a>
+            <a class="active" href="crud-campaign.php">Kelola Campaign</a>
+            <a href="crud-donasi.php">Kelola Donasi</a>
+            <a href="crud-donatur.php">Kelola Donatur</a>
+            <a href="crud-laporan.php">Kelola Laporan</a>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+        <div class="page-head">
+            <h1>Kelola Campaign</h1>
+            <p>Tambah, edit, dan hapus data campaign</p>
+        </div>
+
+        <!-- SUMMARY CARDS (SAMA DONATUR) -->
+        <div class="cards">
+            <div class="card"><h4>Total Campaign</h4><div class="val">5</div></div>
+            <div class="card"><h4>Campaign Aktif</h4><div class="val">3</div></div>
+            <div class="card"><h4>Sudah Ditutup</h4><div class="val">2</div></div>
+            <div class="card"><h4>Total Target</h4><div class="val">Rp 15.000.000</div></div>
+        </div>
+
+        <!-- TOOLBAR (SAMA DONATUR) -->
+        <div class="toolbar">
+            <input type="text" class="input-search" placeholder="Cari campaign...">
+            <select class="filter-select">
+                <option>Semua Status</option>
+                <option>Aktif</option>
+                <option>Ditutup</option>
+            </select>
+            <button class="btn" onclick="location.href='create_campaign.php'">+ Tambah Campaign</button>
+        </div>
+
+        <!-- PANEL -->
+        <div class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Poster</th>
+                            <th>Nama Campaign</th>
+                            <th>Kategori</th>
+                            <th>Target</th>
+                            <th>Terkumpul</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td><img src="img/poster1.jpg" class="thumb"></td>
+                            <td>Renovasi Tempat Wudhu</td>
+                            <td>Fisik Masjid</td>
+                            <td>Rp 5.000.000</td>
+                            <td>Rp 1.200.000</td>
+                            <td><span class="tag active">Aktif</span></td>
+                            <td>
+                                <button class="btn small secondary">Edit</button>
+                                <button class="btn small danger">Hapus</button>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td><img src="img/poster2.jpg" class="thumb"></td>
+                            <td>Pengadaan Al-Qur'an</td>
+                            <td>Program Sosial</td>
+                            <td>Rp 3.000.000</td>
+                            <td>Rp 3.000.000</td>
+                            <td><span class="tag closed">Ditutup</span></td>
+                            <td>
+                                <button class="btn small secondary">Edit</button>
+                                <button class="btn small danger">Hapus</button>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- FOOTER (SAMA DONATUR) -->
+<footer>
+  <p>© 2025 Takmir Masjid — Sistem Donasi</p>
+</footer>
+
+</body>
+</html>

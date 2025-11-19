@@ -1,0 +1,265 @@
+
+
+.top-header {
+    background: #ffffff;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e5e5;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.top-header .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2f4a2f;
+}
+
+.top-nav a {
+    margin-left: 22px;
+    text-decoration: none;
+    font-size: 15px;
+    color: #444;
+    padding: 6px 8px;
+}
+
+.top-nav a:hover {
+    color: #2f4a2f;
+}
+
+.top-nav a.active {
+    font-weight: 700;
+    color: #4CAF50;
+}
+
+/* === LAYOUT STRUCTURE ================================================== */
+
+.container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 22px;
+    margin-top: 20px;
+}
+
+.sidebar {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    height: fit-content;
+}
+
+.sidebar h3 {
+    font-size: 16px;
+    margin: 0 0 15px 0;
+    font-weight: 700;
+    color: #2f4a2f;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 9px 12px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.sidebar ul li a:hover {
+    background: #e8f5e9;
+}
+
+.sidebar ul li a.active {
+    background: #4CAF50;
+    color: #fff;
+}
+
+/* ==== CONTENT =========================================================== */
+
+.content {
+    padding: 5px 2px;
+}
+
+.content h1 {
+    color: #2f4a2f;
+    margin-bottom: 4px;
+    font-size: 27px;
+    font-weight: 700;
+}
+
+.muted {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+/* === SUMMARY CARDS ===================================================== */
+
+.cards {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    background: #ffffff;
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 4px solid #4CAF50;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.card h4 {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #444;
+}
+
+.card .val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e2c;
+}
+
+/* === TOOLBAR ============================================================ */
+
+.toolbar {
+    margin-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.right-tools {
+    display: flex;
+    gap: 10px;
+}
+
+.input-search,
+.filter-select {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid #cfcfcf;
+    font-size: 14px;
+    background: #fafafa;
+}
+
+.input-search {
+    width: 230px;
+}
+
+/* === PANEL =============================================================== */
+
+.panel {
+    margin-top: 26px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    border-left: 4px solid #4CAF50;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+}
+
+.panel h3 {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    color: #333;
+}
+
+/* === TABLE =============================================================== */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th {
+    background: #f5f5f5;
+    padding: 11px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+td {
+    padding: 11px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* === BUTTONS ============================================================= */
+
+.btn {
+    background: #4CAF50;
+    border: none;
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    background: #43a047;
+}
+
+.btn.small {
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.btn.secondary {
+    background: #3498db;
+}
+
+.btn.secondary:hover {
+    background: #2d89c8;
+}
+
+.btn.danger {
+    background: #e74c3c;
+}
+
+.btn.danger:hover {
+    background: #cf3f31;
+}
+
+/* === RESPONSIVE =========================================================== */
+
+@media (max-width: 920px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .right-tools {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
