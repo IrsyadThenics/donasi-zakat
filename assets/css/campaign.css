@@ -1,8 +1,7 @@
-/* ===========================================
-   🌿 Style Campaign - Donasi Masjid & Amal
-   =========================================== */
+/* ================================
+   🌿 Style Campaign - Donasi Masjid
+   ================================ */
 
-/* Reset dasar */
 * {
   margin: 0;
   padding: 0;
@@ -12,16 +11,14 @@
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #1f3d2f;
-  background: #dfede4; /* lembut seperti main section di halaman utama */
+  background: #dfede4;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   line-height: 1.6;
 }
 
-/* ===========================================
-   🕌 Header
-   =========================================== */
+/* ================= HEADER ================= */
 header {
   background: #fff;
   border-bottom: 1px solid #dfede4;
@@ -49,7 +46,7 @@ header {
 }
 
 .logo .icon {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
 }
 
 .nav-links {
@@ -66,14 +63,13 @@ header {
   transition: all 0.3s ease;
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a.active {
   color: #90c943;
   text-decoration: underline;
 }
 
-/* ===========================================
-   🌱 Main Section
-   =========================================== */
+/* ================= MAIN SECTION ================= */
 main {
   flex: 1;
   background: #dfede4;
@@ -94,9 +90,135 @@ h2.page-title {
   padding-bottom: 5px;
 }
 
-/* ===========================================
-   📦 Campaign Cards
-   =========================================== */
+/* ================= REPORT CONTAINER ================= */
+.report-container {
+  max-width: 1200px;
+  width: 90%;
+  margin: 0 auto;
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.report-container header {
+  background: transparent;
+  border: none;
+  position: static;
+  padding: 0;
+  margin-bottom: 30px;
+}
+
+.report-container h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #214a30;
+  margin-bottom: 10px;
+  border-bottom: 3px solid #c0ff28;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+.report-container p {
+  color: #2f4a2f;
+  font-size: 1rem;
+  margin-top: 15px;
+}
+
+/* ================= TABLE STYLES ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 25px;
+  background: #fff;
+}
+
+th {
+  background: #90c943;
+  color: #fff;
+  font-weight: 700;
+  text-align: left;
+  padding: 14px 12px;
+  font-size: 0.95rem;
+  border: none;
+}
+
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e8f2e3;
+  color: #2f4a2f;
+  font-size: 0.92rem;
+}
+
+tr:hover {
+  background: #f8fcf5;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+td strong {
+  color: #214a30;
+  font-weight: 700;
+}
+
+td small {
+  color: #5a7a5a;
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 4px;
+}
+
+td a {
+  color: #90c943;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+td a:hover {
+  color: #214a30;
+  text-decoration: underline;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ================= PROGRESS BAR IN TABLE ================= */
+.progress-bar {
+  background: #e8f2e3;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 22px;
+  width: 100%;
+  min-width: 120px;
+}
+
+.progress-bar-fill {
+  background: #90c943;
+  height: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 22px;
+  font-weight: 600;
+  transition: width 0.3s ease;
+}
+
+/* ================= ALERT / EMPTY STATE ================= */
+.report-container p[style*="background"] {
+  padding: 20px;
+  background: #fff9e6 !important;
+  border: 2px solid #ffd966 !important;
+  color: #856404 !important;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ================= CAMPAIGN CARDS ================= */
 .campaign-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -132,9 +254,7 @@ h2.page-title {
   margin: 15px 0 8px;
 }
 
-/* ===========================================
-   💸 Progress & Info
-   =========================================== */
+/* ================= PROGRESS & INFO ================= */
 .progress-bar-bg {
   background: #e8f2e3;
   border-radius: 6px;
@@ -161,9 +281,7 @@ h2.page-title {
   color: #214a30;
 }
 
-/* ===========================================
-   🔘 Tombol Aksi
-   =========================================== */
+/* ================= BUTTON ================= */
 .btn-group {
   display: flex;
   justify-content: center;
@@ -198,23 +316,19 @@ h2.page-title {
   opacity: 0.9;
 }
 
-/* ===========================================
-   🌙 Footer
-   =========================================== */
+/* ================= FOOTER ================= */
 footer {
   background: #1f3d2f;
   color: #c0ff28;
   text-align: center;
-  padding: 20px 10px;
+  padding: 18px 10px;
   font-size: 0.95rem;
-  letter-spacing: 0.3px;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.3px;
   margin-top: auto;
 }
 
-/* ===========================================
-   📱 Responsive Layout
-   =========================================== */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 960px) {
   .nav-links {
     gap: 20px;
@@ -222,5 +336,29 @@ footer {
 
   h2.page-title {
     font-size: 1.6rem;
+  }
+
+  .campaign-list {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  main {
+    padding: 40px 15px;
+  }
+
+  h2.page-title {
+    font-size: 1.4rem;
+  }
+
+  .campaign-list {
+    width: 95%;
   }
 }

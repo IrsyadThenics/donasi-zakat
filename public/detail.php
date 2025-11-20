@@ -57,8 +57,8 @@
   </main>
 
   <!-- Footer -->
-  <footer>
-    © 2025 Donasi Masjid & Amal | “Berbagi untuk Keberkahan”
-  </footer>
+<footer>
+    © 2025 Masjid Al-Falah. Semua Hak Dilindungi.
+</footer>
 </body>
 </html>

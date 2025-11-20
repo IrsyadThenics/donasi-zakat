@@ -284,16 +284,6 @@ $progress = $target_val > 0 ? min(max(($terkumpul_val / $target_val) * 100, 0), 
                     <input type="text" name="dana_terkumpul" value="<?= safe($campaign['DANA_TERKUMPUL']) ?>">
                 </div>
 
-                <div style="margin-bottom:12px;">
-                    <label>Poster</label>
-                    <?php if (!empty($campaign['POSTER'])): ?>
-                        <div>
-                            <img src="../assets/img/campaign/<?= safe($campaign['POSTER']) ?>" 
-                                style="max-width:180px;border-radius:6px;">
-                        </div>
-                    <?php endif; ?>
-                    <input type="file" name="poster" accept="image/*">
-                </div>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                     <div>

@@ -139,68 +139,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>Form Donasi - Donasi Masjid & Amal</title>
-	<link rel="stylesheet" href="../assets/css/index.css">
-	<style>
-		.form-card{max-width:720px;margin:20px auto;padding:20px;border:1px solid #e2e2e2;border-radius:8px;background:#fff}
-		label{display:block;margin-bottom:6px;font-weight:600}
-		input[type=text], input[type=number], textarea, select{width:100%;padding:10px;margin-bottom:12px;border:1px solid #ccc;border-radius:4px}
-		.btn{display:inline-block;padding:10px 16px;background:#007bff;color:#fff;border-radius:4px;text-decoration:none;border:none;cursor:pointer}
-		.message{padding:10px;margin-bottom:12px;border-radius:4px}
-		.message.success{background:#e6ffed;border:1px solid #2ecc71;color:#1e7e34}
-		.message.error{background:#fff1f0;border:1px solid #e74c3c;color:#c0392b}
-		.campaign-summary{background:#fafafa;padding:10px;border:1px dashed #ddd;border-radius:4px;margin-bottom:12px}
-	</style>
+	<link rel="stylesheet" href="../assets/css/form_donasi.css">
 </head>
 <body>
-	<div class="form-card">
-		<h1>Donasi</h1>
-		<p>Berikan dukungan Anda untuk campaign yang tersedia.</p>
+	<!-- HEADER -->
+	<header class="main-header">
+		<div class="header-wrapper">
+			<h1 class="logo"><a href="../index.php">🌿 Donasi Masjid & Amal</a></h1>
+			<nav class="main-nav">
+				<a href="campaign.php" class="nav-link">Program</a>
+				<a href="form_donasi.php" class="nav-link active">Donasi</a>
+				<?php if ($id_donatur): ?>
+					<a href="dashboard_donatur.php" class="nav-link">Dashboard</a>
+					<a href="../controller/logout_donaturController.php" class="nav-link logout">Logout</a>
+				<?php else: ?>
+					<a href="../auth/login_donatur.php" class="nav-link">Login</a>
+				<?php endif; ?>
+			</nav>
+		</div>
+	</header>
 
-		<?php if ($message): ?>
-			<div class="message <?php echo htmlspecialchars($message_class); ?>"><?php echo htmlspecialchars($message); ?></div>
-		<?php endif; ?>
+	<!-- MAIN CONTENT -->
+	<main class="main-content">
+		<div class="form-container">
+			<!-- PAGE HEADER -->
+			<div class="page-header">
+				<h1>Formulir Donasi</h1>
+				<p>Berikan dukungan Anda untuk campaign yang tersedia dan membantu masyarakat.</p>
+			</div>
 
-		<form method="post" action="">
-			<label for="id_campaign">Pilih Campaign</label>
-			<select name="id_campaign" id="id_campaign" required onchange="this.form.submit();">
-				<option value="">-- Pilih Campaign --</option>
-				<?php foreach ($campaigns as $c): ?>
-					<option value="<?php echo htmlspecialchars($c['ID_CAMPAIGN']); ?>" <?php if (($selected_campaign && strval($selected_campaign['ID_CAMPAIGN'])===strval($c['ID_CAMPAIGN'])) || (!isset($_POST['id_campaign']) && isset($_GET['id_campaign']) && strval($_GET['id_campaign'])===strval($c['ID_CAMPAIGN'])) ) echo 'selected'; ?>>
-						<?php echo htmlspecialchars($c['JUDUL_CAMPAIGN']); ?> — <?php echo formatRupiah($c['TARGET_DANA'] ?? 0); ?>
-					</option>
-				<?php endforeach; ?>
-			</select>
-
-			<?php if ($selected_campaign): ?>
-				<div class="campaign-summary">
-					<strong><?php echo htmlspecialchars($selected_campaign['JUDUL_CAMPAIGN']); ?></strong>
-					<div>Target: <?php echo formatRupiah($selected_campaign['TARGET_DANA'] ?? 0); ?></div>
-					<div>Terkumpul: <?php echo formatRupiah($selected_campaign['DANA_TERKUMPUL'] ?? 0); ?></div>
+			<!-- MESSAGE ALERT -->
+			<?php if ($message): ?>
+				<div class="alert alert-<?php echo htmlspecialchars($message_class); ?>">
+					<span class="alert-icon"><?php echo $message_class === 'success' ? '✓' : '✕'; ?></span>
+					<span class="alert-text"><?php echo htmlspecialchars($message); ?></span>
 				</div>
 			<?php endif; ?>
 
-			<label for="jumlah">Jumlah Donasi (angka, tanpa simbol)</label>
-			<input type="text" name="jumlah" id="jumlah" placeholder="Mis. 50000" value="<?php echo isset($_POST['jumlah']) ? htmlspecialchars($_POST['jumlah']) : ''; ?>" required>
+			<!-- FORM CARD -->
+			<div class="form-card">
+				<form method="post" action="" class="donation-form">
+					<!-- CAMPAIGN SELECTION -->
+					<div class="form-group">
+						<label for="id_campaign" class="form-label">Pilih Campaign <span class="required">*</span></label>
+						<select name="id_campaign" id="id_campaign" class="form-control" required onchange="this.form.submit();">
+							<option value="">-- Pilih Campaign --</option>
+							<?php foreach ($campaigns as $c): ?>
+								<option value="<?php echo htmlspecialchars($c['ID_CAMPAIGN']); ?>" <?php if (($selected_campaign && strval($selected_campaign['ID_CAMPAIGN'])===strval($c['ID_CAMPAIGN'])) || (!isset($_POST['id_campaign']) && isset($_GET['id_campaign']) && strval($_GET['id_campaign'])===strval($c['ID_CAMPAIGN'])) ) echo 'selected'; ?>>
+									<?php echo htmlspecialchars($c['JUDUL_CAMPAIGN']); ?> — <?php echo formatRupiah($c['TARGET_DANA'] ?? 0); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
 
-			<label for="metode">Metode Pembayaran</label>
-			<select name="metode" id="metode">
-				<option value="">-- Pilih Metode --</option>
-				<option value="Transfer Bank" <?php if(isset($_POST['metode']) && $_POST['metode']==='Transfer Bank') echo 'selected'; ?>>Transfer Bank</option>
-				<option value="E-Wallet" <?php if(isset($_POST['metode']) && $_POST['metode']==='E-Wallet') echo 'selected'; ?>>E-Wallet</option>
-				<option value="Tunai" <?php if(isset($_POST['metode']) && $_POST['metode']==='Tunai') echo 'selected'; ?>>Tunai</option>
-			</select>
+					<!-- CAMPAIGN SUMMARY -->
+					<?php if ($selected_campaign): ?>
+						<div class="campaign-summary">
+							<h3><?php echo htmlspecialchars($selected_campaign['JUDUL_CAMPAIGN']); ?></h3>
+							<div class="summary-row">
+								<div class="summary-item">
+									<span class="summary-label">Target Dana</span>
+									<span class="summary-value"><?php echo formatRupiah($selected_campaign['TARGET_DANA'] ?? 0); ?></span>
+								</div>
+								<div class="summary-item">
+									<span class="summary-label">Terkumpul</span>
+									<span class="summary-value highlight"><?php echo formatRupiah($selected_campaign['DANA_TERKUMPUL'] ?? 0); ?></span>
+								</div>
+							</div>
+							<div class="progress-bar">
+								<div class="progress-fill" style="width: <?php 
+									$target = floatval($selected_campaign['TARGET_DANA'] ?? 1);
+									$terkumpul = floatval($selected_campaign['DANA_TERKUMPUL'] ?? 0);
+									echo min(($terkumpul / $target) * 100, 100); 
+								?>%"></div>
+							</div>
+							<p class="progress-text"><?php echo number_format(min(($terkumpul / $target) * 100, 100), 1); ?>% terpenuhi</p>
+						</div>
+					<?php endif; ?>
 
-			<label for="pesan">Pesan (opsional)</label>
-			<textarea name="pesan" id="pesan" rows="4"><?php echo isset($_POST['pesan']) ? htmlspecialchars($_POST['pesan']) : ''; ?></textarea>
+					<!-- DONATION AMOUNT -->
+					<div class="form-group">
+						<label for="jumlah" class="form-label">Jumlah Donasi <span class="required">*</span></label>
+						<div class="input-wrapper">
+							<span class="input-prefix">Rp</span>
+							<input type="text" name="jumlah" id="jumlah" class="form-control" placeholder="50000" value="<?php echo isset($_POST['jumlah']) ? htmlspecialchars($_POST['jumlah']) : ''; ?>" required>
+						</div>
+						<small class="form-hint">Masukkan angka tanpa simbol (contoh: 50000)</small>
+					</div>
 
-			<div style="display:flex;gap:12px;align-items:center">
-				<button type="submit" class="btn">Donasi Sekarang</button>
-				<a href="campaign.php" class="btn" style="background:#6c757d">Kembali</a>
+					<!-- PAYMENT METHOD -->
+					<div class="form-group">
+						<label for="metode" class="form-label">Metode Pembayaran</label>
+						<select name="metode" id="metode" class="form-control">
+							<option value="">-- Pilih Metode --</option>
+							<option value="Transfer Bank" <?php if(isset($_POST['metode']) && $_POST['metode']==='Transfer Bank') echo 'selected'; ?>>🏦 Transfer Bank</option>
+							<option value="E-Wallet" <?php if(isset($_POST['metode']) && $_POST['metode']==='E-Wallet') echo 'selected'; ?>>📱 E-Wallet</option>
+							<option value="Tunai" <?php if(isset($_POST['metode']) && $_POST['metode']==='Tunai') echo 'selected'; ?>>💵 Tunai</option>
+						</select>
+					</div>
+
+					<!-- MESSAGE -->
+					<div class="form-group">
+						<label for="pesan" class="form-label">Pesan (Opsional)</label>
+						<textarea name="pesan" id="pesan" class="form-control" rows="4" placeholder="Sampaikan pesan atau doa Anda..."><?php echo isset($_POST['pesan']) ? htmlspecialchars($_POST['pesan']) : ''; ?></textarea>
+						<small class="form-hint">Pesan Anda akan ditampilkan di halaman campaign</small>
+					</div>
+
+					<!-- ACTION BUTTONS -->
+					<div class="form-actions">
+						<!--<button type="submit" class="btn btn-primary">💚 Donasi Sekarang</button>-->
+						<a href="dashboard_donatur.php" class="btn btn-secondary">← Kembali</a>
+					</div>
+				</form>
 			</div>
-		</form>
 
-		<p style="margin-top:12px;font-size:0.9rem;color:#666">Catatan: Donasi dapat dilakukan dengan atau tanpa login. Jika login, donasi akan tercatat atas nama Anda. Jika tidak login, donasi akan tercatat sebagai anonim.</p>
-	</div>
+			<!-- INFO BOX -->
+			<!--<div class="info-box">
+				<p><strong>ℹ️ Catatan Penting:</strong></p>
+				<ul>
+					<li>Donasi dapat dilakukan dengan atau tanpa login</li>
+					<li>Jika login, donasi akan tercatat atas nama Anda</li>
+					<li>Jika tidak login, donasi akan tercatat sebagai anonim</li>
+					<li>Setiap donasi sangat berarti bagi kami</li>
+				</ul>
+			</div>-->
+		</div>
+	</main>
+
+	<!-- FOOTER -->
+	<footer class="main-footer">
+		<p>© 2025 Masjid Al-Falah | Donasi Masjid & Amal</p>
+	</footer>
 </body>
 </html>
 

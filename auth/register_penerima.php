@@ -14,10 +14,11 @@
         <span class="logo-text">DonasiMasjid</span>
       </div>
       <ul class="nav-links">
-        <li><a href="../index.php" class="active">Beranda</a></li>
-        <li><a href="../public/campaign.php">Program</a></li>
+        <li><a href="../index.php">Beranda</a></li>
+        <li><a href="../public/campaign.php">Campaign</a></li>
         <li><a href="../public/tentang-kami.php">Tentang Kami</a></li>
         <li><a href="login_penerima.php">Login</a></li>
+        <li><a href="register_penerima.php" class="active">Register</a></li>
       </ul>
     </nav>
   </header>

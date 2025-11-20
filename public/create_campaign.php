@@ -72,47 +72,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         // ============== UPLOAD POSTER ===================
-        $poster_filename = null;
-        $upload_error = false;
+//        $poster_filename = null;
+//        $upload_error = false;
 
-        if (!empty($_FILES['poster']['name'])) {
+//        if (!empty($_FILES['poster']['name'])) {
 
-            $up = $_FILES['poster'];
-            $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
-            $validExt = ['png', 'jpg', 'jpeg'];
-            $poster_dir = __DIR__ . '/../assets/img/campaign/';
+//            $up = $_FILES['poster'];
+//            $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
+//            $validExt = ['png', 'jpg', 'jpeg'];
+//            $poster_dir = __DIR__ . '/../assets/img/campaign/';
 
-            if ($up['error'] !== 0) {
-                 $message = "Gagal upload poster. Error Code: " . $up['error'];
-                 $upload_error = true;
-            } elseif (!in_array($ext, $validExt)) {
-                 $message = "Format file harus JPG/PNG.";
-                 $upload_error = true;
-            } elseif ($up['size'] > 2 * 1024 * 1024) {
-                 $message = "Ukuran file lebih dari 2MB.";
-                 $upload_error = true;
-            }
+//            if ($up['error'] !== 0) {
+//                 $message = "Gagal upload poster. Error Code: " . $up['error'];
+//                 $upload_error = true;
+//            } elseif (!in_array($ext, $validExt)) {
+//                 $message = "Format file harus JPG/PNG.";
+//                 $upload_error = true;
+//            } elseif ($up['size'] > 2 * 1024 * 1024) {
+//                 $message = "Ukuran file lebih dari 2MB.";
+//                 $upload_error = true;
+//            }
 
-            if (!$upload_error) {
-                if (!is_dir($poster_dir)) {
-                    if (!mkdir($poster_dir, 0755, true)) {
-                        $message = "Gagal membuat direktori poster.";
-                        $upload_error = true;
-                    }
-                }
-                
-                if (!$upload_error) {
-                    $poster_filename = uniqid("poster_") . "." . $ext;
-                    $dst = $poster_dir . $poster_filename;
+//            if (!$upload_error) {
+//                if (!is_dir($poster_dir)) {
+//                    if (!mkdir($poster_dir, 0755, true)) {
+//                        $message = "Gagal membuat direktori poster.";
+//                        $upload_error = true;
+//                    }
+//                }
+            
+//                if (!$upload_error) {
+//                    $poster_filename = uniqid("poster_") . "." . $ext;
+//                    $dst = $poster_dir . $poster_filename;
 
-                    if (!move_uploaded_file($up['tmp_name'], $dst)) {
-                        $message = "Gagal memindahkan file poster.";
-                        $poster_filename = null; 
-                        $upload_error = true;
-                    }
-                }
-            }
-        }
+//                    if (!move_uploaded_file($up['tmp_name'], $dst)) {
+//                        $message = "Gagal memindahkan file poster.";
+//                        $poster_filename = null; 
+//                        $upload_error = true;
+//                    }
+//                }
+//            }
+//        }
         
         // Hanya lanjutkan INSERT jika tidak ada error dari upload atau validasi
         if (empty($message) && !$upload_error) { 
@@ -121,11 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "
             INSERT INTO campaign (
                 id_campaign, id_penerima, judul_campaign, deskripsi, target_dana, 
-                dana_terkumpul, poster, tanggal_mulai, tanggal_deadline, status, 
+                dana_terkumpul, tanggal_mulai, tanggal_deadline, status, 
                 created_at, updated_at
             ) VALUES (
                 seq_campaign.nextval, :id_penerima, :judul, :deskripsi, :target,
-                :dana, :poster, TO_DATE(:mulai,'YYYY-MM-DD'), TO_DATE(:deadline,'YYYY-MM-DD'),
+                :dana, TO_DATE(:mulai,'YYYY-MM-DD'), TO_DATE(:deadline,'YYYY-MM-DD'),
                 'Aktif', SYSDATE, SYSDATE
             )";
 
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 oci_bind_by_name($stmt, ':deskripsi', $deskripsi);
                 oci_bind_by_name($stmt, ':target', $target);
                 oci_bind_by_name($stmt, ':dana', $dana_terkumpul);
-                oci_bind_by_name($stmt, ':poster', $bindPoster);
+                //oci_bind_by_name($stmt, ':poster', $bindPoster);
                 oci_bind_by_name($stmt, ':mulai', $mulai);
                 oci_bind_by_name($stmt, ':deadline', $deadline);
 
@@ -239,11 +239,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <textarea name="deskripsi" rows="5" required><?= esc($_POST['deskripsi'] ?? '') ?></textarea>
                 </div>
                 
-                <div style="margin-bottom:16px;">
-                    <label>Poster Campaign</label>
-                    <input type="file" name="poster" accept="image/*">
-                    <small>File JPG/PNG maks 2MB</small>
-                </div>
 
                 <div style="margin-bottom:16px;">
                     <label>Target Dana (misal: 5000000)</label>

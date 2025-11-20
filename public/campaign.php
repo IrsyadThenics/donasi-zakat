@@ -53,27 +53,32 @@ if ($stmt) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Laporan Campaign Aktif</title>
-
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }
-    .report-container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background-color: #4CAF50; color: white; }
-    .progress-bar { background-color: #f3f3f3; border-radius: 4px; overflow: hidden; height: 20px; }
-    .progress-bar-fill { background-color: #2196F3; height: 100%; text-align: center; color: white; font-size: 12px; line-height: 20px; }
-    .text-center { text-align: center; }
-  </style>
+  <link rel="stylesheet" href="../assets/css/campaign.css" />
 </head>
+<header>
+    <div class="nav-container">
+      <div class="logo">
+        <span class="icon">🕌</span>
+        <span>Campaign</span>
+      </div>
+      <ul class="nav-links">
+       <li><a href="../index.php">Beranda</a></li>
+        <li><a href="campaign.php" class="active">Campaign</a></li>
+        <li><a href="tentang-kami.php">Tentang Kami</a></li>
+        <li><a href="../auth/login_donatur.php">Login Donatur</a></li>
+        <li><a href="../auth/login_penerima.php">Login Penerima</a></li>
+      </ul>
+    </div>
+  </header>
+  <br><br>
 
 <body>
 
 <div class="report-container">
 
     <header>
-        <h1>📋 Laporan Campaign Aktif</h1>
-        <p>Ringkasan program donasi yang sedang berjalan.</p>
+        <h1>📋 Campaign Aktif</h1>
+        <!--<p>Ringkasan program donasi yang sedang berjalan.</p>-->
     </header>
 
     <?php if (empty($campaigns)): ?>
@@ -126,7 +131,7 @@ if ($stmt) {
                     </td>
                     <td><?php echo htmlspecialchars($c['TANGGAL_DEADLINE']); ?></td>
                     <td class="text-center">
-                        <a href="detail1.php?id=<?php echo $id; ?>" style="color:#2196F3; text-decoration:none;">Lihat Detail</a>
+                        <a href="detail.php?id=<?php echo $id; ?>" style="color:#2196F3; text-decoration:none;">Lihat Detail</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -134,6 +139,10 @@ if ($stmt) {
         </table>
     <?php endif; ?>
 </div>
+
+<footer>
+    © 2025 Masjid Al-Falah. Semua Hak Dilindungi.
+</footer>
 
 </body>
 </html>
