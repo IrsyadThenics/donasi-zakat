@@ -6,141 +6,242 @@
     <title>Kelola Laporan — Dashboard Takmir</title>
 
     <!-- GLOBAL CSS CRUD LAPORAN -->
-    <link rel="stylesheet" href="../assets/css/crud-donatur.css">
-    <link rel="stylesheet" href="../assets/css/crud-laporan.css">
+    <?php
+/**
+ * crud-laporan.php
+ * Menampilkan & mengelola laporan penggunaan dana campaign
+ * Database Oracle (oci8)
+ */
+session_start();
+require_once '../config/db.php';
+
+// -----------------------------------------------------
+// Pastikan penerima login
+// -----------------------------------------------------
+$username_penerima = $_SESSION['username'] ?? null;
+
+if (!$username_penerima) {
+    header("Location: ../auth/login_penerima.php");
+    exit;
+}
+
+// -----------------------------------------------------
+// Ambil id_penerima berdasarkan username login
+// -----------------------------------------------------
+$id_penerima = null;
+$stmt = oci_parse($conn, "SELECT id_penerima FROM penerima WHERE username = :username");
+oci_bind_by_name($stmt, ":username", $username_penerima);
+oci_execute($stmt);
+
+if ($row = oci_fetch_assoc($stmt)) {
+    $id_penerima = intval($row['ID_PENERIMA']);
+}
+oci_free_statement($stmt);
+
+if (!$id_penerima) {
+    header("Location: ../auth/login_penerima.php");
+    exit;
+}
+
+// -----------------------------------------------------
+// Jika klik HAPUS laporan
+// -----------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus'])) {
+    $id_laporan = intval($_POST['id_laporan']);
+
+    $del = oci_parse($conn, "DELETE FROM laporan WHERE id_laporan = :id AND id_penerima = :p");
+    oci_bind_by_name($del, ":id", $id_laporan);
+    oci_bind_by_name($del, ":p", $id_penerima);
+
+    if (@oci_execute($del, OCI_NO_AUTO_COMMIT)) {
+        oci_commit($conn);
+        header("Location: crud-laporan.php?msg=deleted");
+        exit;
+    } else {
+        oci_rollback($conn);
+        $err = oci_error($del);
+        die("Gagal menghapus laporan: " . $err['message']);
+    }
+}
+
+// -----------------------------------------------------
+// Ambil semua laporan milik penerima
+// -----------------------------------------------------
+$laporan = [];
+
+$sql = oci_parse(
+    $conn,
+    "SELECT
+        l.id_laporan,
+        l.judul_laporan,
+        l.total_dana_terkumpul,
+        l.tanggal_generate,
+        c.judul_campaign
+     FROM laporan l
+     JOIN campaign c ON l.id_campaign = c.id_campaign
+     WHERE l.id_penerima = :p
+     ORDER BY l.tanggal_generate DESC"
+);
+
+oci_bind_by_name($sql, ":p", $id_penerima);
+oci_execute($sql);
+
+while ($row = oci_fetch_assoc($sql)) {
+    $laporan[] = $row;
+}
+
+oci_free_statement($sql);
+
+// -----------------------------------------------------
+// Helper format rupiah
+// -----------------------------------------------------
+function rupiah($n) {
+    return 'Rp ' . number_format($n, 0, ',', '.');
+}
+
+?>
+
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Laporan — Dashboard Takmir</title>
+
+
+<link rel="stylesheet" href="../assets/css/crud-donatur.css">
+<link rel="stylesheet" href="../assets/css/crud-laporan.css">
+
+
 </head>
 
 <body>
 
-    <!-- ================= HEADER ================= -->
-    <header>
-        <div class="nav-container">
-            <div class="logo" style="font-weight:bold; color:#2f4a2f;">
-                🕌 Manajemen Masjid
-            </div>
+<!-- ================= HEADER ================= -->
 
-            <ul class="nav-links">
-                <li><a href="index.php">Beranda</a></li>
-                <li><a href="tentang.php">Tentang</a></li>
-                <li><a href="kontak.php">Kontak</a></li>
-                <li><a href="dashboard-penerima.php" class="active">Dashboard</a></li>
-            </ul>
+<header>
+    <div class="nav-container">
+        <div class="logo" style="font-weight:bold; color:#2f4a2f;">
+            🕌 Manajemen Masjid
         </div>
-    </header>
 
-    <!-- ================= WRAPPER ================= -->
-    <div class="wrap">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-            <h3 style="margin-bottom:15px; color:#2f4a2f;">Menu Admin</h3>
+    <ul class="nav-links">
+        <li><a href="index.php">Beranda</a></li>
+        <li><a href="tentang.php">Tentang</a></li>
+        <li><a href="kontak.php">Kontak</a></li>
+        <li><a href="dashboard_penerima.php" class="active">Dashboard</a></li>
+    </ul>
+</div>
 
-            <div class="side-list">
-                <a href="dashboard_penerima.php">Dashboard</a>
-                <a href="crud-campaign.php">Kelola Campaign</a>
-                <a href="crud-donasi.php">Kelola Donasi</a>
-                <a href="crud-donatur.php">Kelola Donatur</a>
-                <a href="crud-laporan.php" class="active">Kelola Laporan</a>
-            </div>
-        </aside>
 
-        <!-- CONTENT -->
-        <main class="content">
+</header>
 
-            <h1 style="color:#2f4a2f; font-size:26px; font-weight:700;">
-                Kelola Laporan
-            </h1>
-            <p style="color:#777;">Transparansi penggunaan dana setiap campaign</p>
+<!-- ================= WRAPPER ================= -->
 
-            <!-- CARDS -->
-            <div class="cards">
+<div class="wrap">
 
-                <div class="card">
-                    <h4>Total Laporan</h4>
-                    <div class="val">12</div>
-                </div>
 
-                <div class="card">
-                    <h4>Bulan Ini</h4>
-                    <div class="val">4</div>
-                </div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <h3 style="margin-bottom:15px; color:#2f4a2f;">Menu Admin</h3>
 
-                <div class="card">
-                    <h4>Total Pengeluaran</h4>
-                    <div class="val">Rp 1.280.000</div>
-                </div>
+    <div class="side-list">
+        <a href="dashboard_penerima.php">Dashboard</a>
+        <a href="crud-campaign.php">Kelola Campaign</a>
+        <a href="crud-donasi.php">Kelola Donasi</a>
+        <a href="crud-donatur.php">Kelola Donatur</a>
+        <a href="crud-laporan.php" class="active">Kelola Laporan</a>
+    </div>
+</aside>
 
-                <div class="card">
-                    <h4>Campaign Terlapor</h4>
-                    <div class="val">2</div>
-                </div>
+<!-- CONTENT -->
+<main class="content">
 
-            </div>
+    <h1 style="color:#2f4a2f; font-size:26px; font-weight:700;">
+        Kelola Laporan
+    </h1>
+    <p style="color:#777;">Transparansi penggunaan dana setiap campaign</p> <br><br>
 
-            <!-- TOOLBAR -->
-            <div class="toolbar">
-                <button class="btn" id="btnAdd">+ Tambah Laporan</button>
-
-                <input type="text" class="input-search" placeholder="Cari laporan...">
-                <select class="filter-select">
-                    <option>Semua Campaign</option>
-                    <option>Jum'at Berkah</option>
-                    <option>Bantuan Sosial</option>
-                </select>
-            </div>
-
-            <!-- TABLE PANEL -->
-            <div class="panel">
-                <h3 style="margin-bottom:15px; color:#2f4a2f;">Daftar Laporan Penggunaan Dana</h3>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Tanggal</th>
-                            <th>Judul</th>
-                            <th>Campaign</th>
-                            <th>Jumlah</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        <tr>
-                            <td>2025-11-12</td>
-                            <td>Penggunaan Donasi Jum'at Berkah - Pembelian Beras</td>
-                            <td>Jum'at Berkah</td>
-                            <td>Rp 80.000</td>
-                            <td>
-                                <button class="btn small secondary">Detail</button>
-                                <button class="btn small danger">Hapus</button>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>2025-11-07</td>
-                            <td>Penggunaan Donasi Bantuan Sosial - Semen Renovasi</td>
-                            <td>Bantuan Sosial</td>
-                            <td>Rp 1.200.000</td>
-                            <td>
-                                <button class="btn small secondary">Detail</button>
-                                <button class="btn small danger">Hapus</button>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
-        </main>
-
+    <!-- BUTTON TAMBAH -->
+    <div style="margin-bottom:15px;">
+        <a href="tambah_laporan.php" class="btn" style="padding:8px 14px;">
+            + Tambah Laporan
+        </a>
     </div>
 
-    <!-- ================= FOOTER ================= -->
-    <footer>
-        © 2025 Masjid Al-Falah — Dashboard Takmir
-    </footer>
-    <script src="../assets/js/crud-laporan.js"></script>
+    <!-- TABLE PANEL -->
+    <div class="panel">
+        <h3 style="margin-bottom:15px; color:#2f4a2f;">Daftar Laporan</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Judul Laporan</th>
+                    <th>Campaign</th>
+                    <th>Total Dana</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <?php if (empty($laporan)) : ?>
+                    <tr>
+                        <td colspan="5" style="text-align:center; color:#888;">
+                            Belum ada laporan
+                        </td>
+                    </tr>
+                <?php else : ?>
+                    <?php foreach ($laporan as $l) : ?>
+                        <tr>
+                            <td><?= htmlspecialchars($l['TANGGAL_GENERATE']) ?></td>
+                            <td><?= htmlspecialchars($l['JUDUL_LAPORAN']) ?></td>
+                            <td><?= htmlspecialchars($l['JUDUL_CAMPAIGN']) ?></td>
+                            <td><?= rupiah($l['TOTAL_DANA_TERKUMPUL']) ?></td>
+                            <td>
+
+                                <a href="edit_laporan.php?id=<?= $l['ID_LAPORAN'] ?>"
+                                   class="btn small secondary"
+                                   style="text-decoration:none;">
+                                   Edit
+                                </a>
+
+                                <form method="POST" style="display:inline;"
+                                      onsubmit="return confirm('Yakin menghapus laporan ini?')">
+                                    <input type="hidden" name="id_laporan" value="<?= $l['ID_LAPORAN'] ?>">
+                                    <button type="submit" name="hapus" class="btn small danger">
+                                        Hapus
+                                    </button>
+                                </form>
+
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+
+</div>
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+    © 2025 Masjid Al-Falah — Dashboard Takmir
+</footer>
+<script src="../assets/js/crud-laporan.js"></script>
 
 </body>
 </html>
+
+<?php oci_close($conn); ?>
+
+
+

@@ -316,6 +316,30 @@ td a:hover {
   opacity: 0.9;
 }
 
+.btn-back {
+  
+  display: inline-block;
+  background: #c0ff28;
+  color: #214a30;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 26px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px rgba(192, 255, 40, 0.4);
+  margin-top: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-back:hover {
+  background: #a9e51f;
+  color: #f6ffea;
+  transform: translateY(-2px);
+}
+
 /* ================= FOOTER ================= */
 footer {
   background: #1f3d2f;

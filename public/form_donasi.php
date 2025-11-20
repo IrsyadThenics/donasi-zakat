@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 	<!-- HEADER -->
-	<header class="main-header">
+	<!--<header class="main-header">
 		<div class="header-wrapper">
 			<h1 class="logo"><a href="../index.php">🌿 Donasi Masjid & Amal</a></h1>
 			<nav class="main-nav">
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				<?php endif; ?>
 			</nav>
 		</div>
-	</header>
+	</header>-->
 
 	<!-- MAIN CONTENT -->
 	<main class="main-content">
@@ -180,17 +180,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			<div class="form-card">
 				<form method="post" action="" class="donation-form">
 					<!-- CAMPAIGN SELECTION -->
-					<div class="form-group">
-						<label for="id_campaign" class="form-label">Pilih Campaign <span class="required">*</span></label>
-						<select name="id_campaign" id="id_campaign" class="form-control" required onchange="this.form.submit();">
-							<option value="">-- Pilih Campaign --</option>
-							<?php foreach ($campaigns as $c): ?>
-								<option value="<?php echo htmlspecialchars($c['ID_CAMPAIGN']); ?>" <?php if (($selected_campaign && strval($selected_campaign['ID_CAMPAIGN'])===strval($c['ID_CAMPAIGN'])) || (!isset($_POST['id_campaign']) && isset($_GET['id_campaign']) && strval($_GET['id_campaign'])===strval($c['ID_CAMPAIGN'])) ) echo 'selected'; ?>>
-									<?php echo htmlspecialchars($c['JUDUL_CAMPAIGN']); ?> — <?php echo formatRupiah($c['TARGET_DANA'] ?? 0); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</div>
 
 					<!-- CAMPAIGN SUMMARY -->
 					<?php if ($selected_campaign): ?>
@@ -229,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 					<!-- PAYMENT METHOD -->
 					<div class="form-group">
-						<label for="metode" class="form-label">Metode Pembayaran</label>
+						<label for="metode" class="form-label">Metode Pembayaran <span class="required">*</span></label>
 						<select name="metode" id="metode" class="form-control">
 							<option value="">-- Pilih Metode --</option>
 							<option value="Transfer Bank" <?php if(isset($_POST['metode']) && $_POST['metode']==='Transfer Bank') echo 'selected'; ?>>🏦 Transfer Bank</option>
@@ -243,6 +232,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						<label for="pesan" class="form-label">Pesan (Opsional)</label>
 						<textarea name="pesan" id="pesan" class="form-control" rows="4" placeholder="Sampaikan pesan atau doa Anda..."><?php echo isset($_POST['pesan']) ? htmlspecialchars($_POST['pesan']) : ''; ?></textarea>
 						<small class="form-hint">Pesan Anda akan ditampilkan di halaman campaign</small>
+					</div>
+
+					<!-- CAMPAIGN SELECTION -->
+					<div class="form-group">
+						<label for="id_campaign" class="form-label">Pilih Campaign <span class="required">*</span></label>
+						<select name="id_campaign" id="id_campaign" class="form-control" required onchange="this.form.submit();">
+							<option value="">-- Pilih Campaign --</option>
+							<?php foreach ($campaigns as $c): ?>
+								<option value="<?php echo htmlspecialchars($c['ID_CAMPAIGN']); ?>" <?php if (($selected_campaign && strval($selected_campaign['ID_CAMPAIGN'])===strval($c['ID_CAMPAIGN'])) || (!isset($_POST['id_campaign']) && isset($_GET['id_campaign']) && strval($_GET['id_campaign'])===strval($c['ID_CAMPAIGN'])) ) echo 'selected'; ?>>
+									<?php echo htmlspecialchars($c['JUDUL_CAMPAIGN']); ?> — <?php echo formatRupiah($c['TARGET_DANA'] ?? 0); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
 					</div>
 
 					<!-- ACTION BUTTONS -->

@@ -6,14 +6,8 @@ password 1-8
 
 
 apa  saja yang kurang di web sistem-donasi
-1. path tombol donasi yang di campaign
-2. dashboard donatur yang masih error
-3. tombol logout di dashboard penerima
-4. tombol donasi sekarang yang ada di detail campaign
-5. membuat tombol untuk membuat campaign baru di dashboard penerima
-6. membetulkan form donasi yang memilih campaign dan memberikan validasi
-7. membetulkan tombol donasi yang ada di dashboard donatur
-8. membetulkan validasi yang ada di dashboard donator dan penerima yang kalua pathnya di ganti bisa langsung masuk (sudah dikerjakan)
-9. logout controller belum ada isinya (sudah dikerjakan)
-10. penerima tidak ada top 5 tapi diksih crud
-11. crud laporan
+1. kelola donasi ada crud (sudah)
+2. laporan menggunakan procedure (sudah) (tinggal styling)
+3. dashboard donatur di rapikan (hampir)
+4. top 5 campaign (sudah)
+5. gambar menggunakan path

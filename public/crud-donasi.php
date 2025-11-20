@@ -266,6 +266,8 @@ if ($search || $filter_metode) {
                                 echo "<form method='POST' style='display:inline;' onsubmit='return confirm(\"Yakin hapus donasi ini?\")'>";
                                 echo "<input type='hidden' name='action' value='delete'>";
                                 echo "<input type='hidden' name='id_donasi' value='" . htmlspecialchars($id_donasi) . "'>";
+                                //fungsi edit bisa ditambahkan jika perlu
+                                echo "<button type='button' class='btn small secondary' onclick=\"location.href='edit_donasi-penerima.php?id=" . htmlspecialchars($id_donasi) . "'\">Edit</button> ";
                                 echo "<button type='submit' class='btn small danger'>Hapus</button>";
                                 echo "</form>";
                                 echo "</td>";

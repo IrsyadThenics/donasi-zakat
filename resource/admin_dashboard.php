@@ -1,532 +1,367 @@
 <?php
 /**
- * Admin Dashboard - Monitoring & Analytics
- * Untuk monitoring performance dan database statistics
+ * Dashboard Donatur (Donor Dashboard)
+ * Menampilkan riwayat donasi, laporan penggunaan dana, dan statistik donor
+ * Database: Oracle (oci8)
  */
-
+session_start();
 require_once '../config/db.php';
 
-// Function format Rupiah
-function formatRupiah($num) {
-    return 'Rp ' . number_format($num, 0, ',', '.');
+// Cek apakah user sudah login
+$email_donatur = $_SESSION['email'] ?? null;
+
+if (!$email_donatur) {
+	header('Location: ../auth/login_donatur.php');
+	exit;
 }
 
-// Get Dashboard Stats
-$query_stats = "
-    SELECT 
-        (SELECT COUNT(*) FROM campaigns) as total_campaigns,
-        (SELECT COUNT(*) FROM donaturs) as total_donaturs,
-        (SELECT COUNT(*) FROM donations) as total_donations,
-        (SELECT SUM(amount) FROM donations WHERE status='completed') as total_amount,
-        (SELECT AVG(amount) FROM donations WHERE status='completed') as avg_amount
-    FROM DUAL
-";
+// Query untuk mendapatkan id_donatur dari email
+$id_donatur = null;
+$stmt_cek = oci_parse($conn, "SELECT id_donatur FROM donatur WHERE email = :email");
+if ($stmt_cek) {
+	oci_bind_by_name($stmt_cek, ':email', $email_donatur);
+	if (oci_execute($stmt_cek)) {
+		if ($row = oci_fetch_assoc($stmt_cek)) {
+			$id_donatur = intval($row['ID_DONATUR']);
+		}
+	}
+	oci_free_statement($stmt_cek);
+}
 
-$stmt_stats = oci_parse($conn, $query_stats);
-oci_execute($stmt_stats);
-$stats = oci_fetch_assoc($stmt_stats);
+if (!$id_donatur) {
+	header('Location: ../auth/login_donatur.php');
+	exit;
+}
 
-// Get campaign stats
-$query_campaigns = "
-    SELECT 
-        c.campaign_id,
-        c.campaign_name,
-        c.target_amount,
-        NVL(ct.total_donations, 0) as total_donations,
-        NVL(ct.donation_count, 0) as donation_count,
-        ROUND((NVL(ct.total_donations, 0) / c.target_amount) * 100, 2) as progress
-    FROM campaigns c
-    LEFT JOIN campaign_totals ct ON c.campaign_id = ct.campaign_id
-    ORDER BY ct.total_donations DESC NULLS LAST
-";
+function formatRupiah($num) {
+	return 'Rp ' . number_format(floatval($num), 0, ',', '.');
+}
 
-$stmt_campaigns = oci_parse($conn, $query_campaigns);
-oci_execute($stmt_campaigns);
+// ========================================
+// QUERY DATA STATISTIK DONATUR
+// ========================================
 
-// Get recent donations
-$query_recent = "
-    SELECT 
-        d.donation_id,
-        d.amount,
-        d.donation_date,
-        don.name as donatur_name,
-        c.campaign_name,
-        d.status
-    FROM donations d
-    JOIN donaturs don ON d.donatur_id = don.donatur_id
-    JOIN campaigns c ON d.campaign_id = c.campaign_id
-    ORDER BY d.donation_date DESC
-    FETCH FIRST 10 ROWS ONLY
-";
+// 1. Total donasi count
+$total_donasi = 0;
+$total_nominal = 0;
+$transaksi_sukses = 0;
+$program_aktif = 0;
 
-$stmt_recent = oci_parse($conn, $query_recent);
-oci_execute($stmt_recent);
+$stmt_stat = oci_parse($conn, "
+	SELECT 
+		COUNT(DISTINCT d.id_donasi) as total_donasi,
+		SUM(d.jumlah_donasi) as total_nominal,
+		COUNT(DISTINCT c.id_campaign) as program_count,
+		AVG(d.jumlah_donasi) as rata_rata_donasi
+	FROM donasi d
+	LEFT JOIN campaign c ON d.id_campaign = c.id_campaign
+	WHERE d.id_donatur = :id_donatur
+");
+
+if ($stmt_stat) {
+	oci_bind_by_name($stmt_stat, ':id_donatur', $id_donatur);
+	if (oci_execute($stmt_stat)) {
+		if ($row = oci_fetch_assoc($stmt_stat)) {
+			$total_donasi = intval($row['TOTAL_DONASI'] ?? 0);
+			$total_nominal = floatval($row['TOTAL_NOMINAL'] ?? 0);
+			$program_aktif = intval($row['PROGRAM_COUNT'] ?? 0);
+		}
+	}
+}
+oci_free_statement($stmt_stat);
+
+// Hitung rata-rata donasi
+$rata_rata_donasi = $total_donasi > 0 ? $total_nominal / $total_donasi : 0;
+
+// ========================================
+// QUERY RIWAYAT DONASI (untuk table)
+// ========================================
+$riwayat_donasi = [];
+$stmt_riwayat = oci_parse($conn, "
+	SELECT 
+		d.id_donasi,
+		d.tanggal_donasi,
+		d.jumlah_donasi,
+		d.is_anonim,
+		c.id_campaign,
+		c.judul_campaign,
+		c.status as campaign_status
+	FROM donasi d
+	JOIN campaign c ON d.id_campaign = c.id_campaign
+	WHERE d.id_donatur = :id_donatur
+	ORDER BY d.tanggal_donasi DESC
+");
+
+if ($stmt_riwayat) {
+	oci_bind_by_name($stmt_riwayat, ':id_donatur', $id_donatur);
+	if (oci_execute($stmt_riwayat)) {
+		while ($row = oci_fetch_assoc($stmt_riwayat)) {
+			$riwayat_donasi[] = $row;
+		}
+	}
+}
+oci_free_statement($stmt_riwayat);
+
+// ========================================
+// QUERY LAPORAN PENGGUNAAN DANA (TRANSPARANSI)
+// ========================================
+$laporan_list = [];
+$stmt_laporan = oci_parse($conn, "
+	SELECT 
+		lr.id_laporan,
+		lr.judul_laporan,
+		lr.isi_laporan,
+		lr.tanggal_generate,
+		lr.total_dana_terkumpul,
+		c.judul_campaign
+	FROM laporan lr
+	JOIN campaign c ON lr.id_campaign = c.id_campaign
+	WHERE EXISTS (
+		SELECT 1 FROM donasi d2
+		WHERE d2.id_donatur = :id_donatur
+		AND d2.id_campaign = lr.id_campaign
+	)
+	ORDER BY lr.tanggal_generate DESC
+");
+
+if ($stmt_laporan) {
+	oci_bind_by_name($stmt_laporan, ':id_donatur', $id_donatur);
+	if (oci_execute($stmt_laporan)) {
+		while ($row = oci_fetch_assoc($stmt_laporan)) {
+			$laporan_list[] = $row;
+		}
+	}
+}
+oci_free_statement($stmt_laporan);
 
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Analytics</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #667eea;
-        }
-
-        .stat-card h3 {
-            color: #666;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card .value {
-            color: #333;
-            font-size: 32px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .subtitle {
-            color: #999;
-            font-size: 12px;
-        }
-
-        .stat-card.secondary {
-            border-left-color: #764ba2;
-        }
-
-        .stat-card.success {
-            border-left-color: #27ae60;
-        }
-
-        .stat-card.warning {
-            border-left-color: #f39c12;
-        }
-
-        .stat-card.danger {
-            border-left-color: #e74c3c;
-        }
-
-        /* Two Column Layout */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        /* Table */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f8f9fa;
-        }
-
-        thead th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #555;
-            border-bottom: 2px solid #eee;
-            font-size: 13px;
-        }
-
-        tbody td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            font-size: 14px;
-        }
-
-        tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .campaign-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .campaign-name {
-            flex: 1;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .badge.success {
-            background: #e8f5e9;
-            color: #388e3c;
-        }
-
-        /* Charts */
-        .chart-placeholder {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            padding: 40px;
-            border-radius: 8px;
-            text-align: center;
-            color: #999;
-            margin-top: 20px;
-        }
-
-        /* Footer Info */
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #1976d2;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #555;
-        }
-
-        .info-box strong {
-            color: #1976d2;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                padding: 20px;
-            }
-
-            header h1 {
-                font-size: 20px;
-            }
-
-            table {
-                font-size: 12px;
-            }
-
-            thead th, tbody td {
-                padding: 8px;
-            }
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .loading {
-            text-align: center;
-            color: #999;
-            padding: 40px;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<title>Dashboard Donatur - Donasi Masjid & Amal</title>
+	<link rel="stylesheet" href="../assets/css/dashboard_donatur.css">
+	
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1>📊 Admin Dashboard</h1>
-            <p>Analytics & Monitoring - Donasi Masjid & Amal</p>
-        </header>
+	<!-- HEADER -->
+	<header class="main-header">
+		<div class="header-content">
+			<h1><a href="../index.php">🕌 Donasi Masjid & Amal</a></h1>
+			<nav class="main-nav">
+				<a href="campaign.php" class="nav-link">Program</a>
+				<a href="form_donasi.php" class="nav-link">Donasi</a>
+				<a href="top_campaign.php">top campaign</a>
+				<a href="#" class="nav-link">Dashboard</a>
+				<a href="../controller/logout_donaturController.php" class="nav-link logout">Logout</a>
+			</nav>
+		</div>
+	</header>
 
-        <!-- Statistics Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>📈 Total Campaign</h3>
-                <div class="value"><?php echo $stats['TOTAL_CAMPAIGNS']; ?></div>
-                <div class="subtitle">Campaign aktif</div>
-            </div>
+	<!-- MAIN CONTENT -->
+	<main class="main-content">
+		<div class="page-header">
+			<h1>Dashboard Donatur</h1>
+			<p>Selamat datang kembali, Donatur! Laporan penggunaan dana akan tampil di bawah jika admin sudah menggunggahnya.</p>
+		</div>
 
-            <div class="stat-card secondary">
-                <h3>👥 Total Donatur</h3>
-                <div class="value"><?php echo $stats['TOTAL_DONATURS']; ?></div>
-                <div class="subtitle">Donatur terdaftar</div>
-            </div>
+		<!-- STATISTIK KARTU -->
+		<div class="stats-container">
+			<div class="stat-card">
+				<div class="stat-label">Total Donasi</div>
+				<div class="stat-value" id="totalDonasiCount"><?php echo htmlspecialchars($total_donasi); ?> Donasi</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Total Nominal</div>
+				<div class="stat-value" id="totalDonasiNominal"><?php echo formatRupiah($total_nominal); ?></div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Transaksi Berhasil</div>
+				<div class="stat-value" id="transaksiSukses"><?php echo htmlspecialchars($total_donasi); ?></div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-label">Program Aktif</div>
+				<div class="stat-value" id="programAktif"><?php echo htmlspecialchars($program_aktif); ?> Program</div>
+			</div>
+		</div>
 
-            <div class="stat-card success">
-                <h3>💰 Total Donasi</h3>
-                <div class="value"><?php echo formatRupiah($stats['TOTAL_AMOUNT']); ?></div>
-                <div class="subtitle">Dari <?php echo $stats['TOTAL_DONATIONS']; ?> transaksi</div>
-            </div>
+		<!-- RIWAYAT DONASI TABLE -->
+		<div class="donasi-box">
+			<h3 class="table-title">Riwayat Donasi</h3>
+			<table id="donationTable">
+				
 
-            <div class="stat-card warning">
-                <h3>📊 Rata-rata Donasi</h3>
-                <div class="value"><?php echo formatRupiah($stats['AVG_AMOUNT']); ?></div>
-                <div class="subtitle">Per transaksi</div>
-            </div>
-        </div>
 
-        <!-- Main Content Grid -->
-        <div class="content-grid">
-            <!-- Campaign Progress -->
-            <div class="card">
-                <div class="card-header">
-                    🏆 Campaign Progress
-                </div>
-                <div class="card-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Campaign</th>
-                                <th class="text-right">Terkumpul</th>
-                                <th style="width: 100px;">Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $campaign_count = 0;
-                            while ($campaign = oci_fetch_assoc($stmt_campaigns)) {
-                                $campaign_count++;
-                                if ($campaign_count > 5) break; // Show top 5
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="campaign-name"><?php echo htmlspecialchars($campaign['CAMPAIGN_NAME']); ?></div>
-                                    </td>
-                                    <td class="text-right">
-                                        <strong><?php echo formatRupiah($campaign['TOTAL_DONATIONS']); ?></strong>
-                                    </td>
-                                    <td>
-                                        <div class="progress-bar">
-                                            <div class="progress-fill" style="width: <?php echo min($campaign['PROGRESS'], 100); ?>%"></div>
-                                        </div>
-                                        <small><?php echo $campaign['PROGRESS']; ?>%</small>
-                                    </td>
-                                </tr>
-                            <?php
-                            }
-                            ?>
-                        </tbody>
-                    </table>
+			 <thead>
+			  <tr>
+			  <th>Tanggal</th>
+			  <th>Program</th>
+			  <th>Jumlah</th>
+			  <th>Status Campaign</th>  <th>Aksi</th>
+			  </tr>
+			 </thead>
+			 <tbody>
+			  <?php
+			  if (empty($riwayat_donasi)) {
+			  echo "<tr><td colspan='5' style='text-align:center;color:#999;'>Belum ada riwayat donasi</td></tr>";
+			  } else {
+			  foreach ($riwayat_donasi as $donasi) {
+			 $tanggal = !empty($donasi['TANGGAL_DONASI']) && strtotime($donasi['TANGGAL_DONASI']) !== false 
+			 ? date('Y-m-d', strtotime($donasi['TANGGAL_DONASI'])) 
+			 : '-';
+			 $status = $donasi['CAMPAIGN_STATUS'] ?? 'Tidak Ada';
+			 $status_class = match($status) {
+			 'Aktif' => 'status-aktif',
+			 'Selesai' => 'status-terkumpul',
+			 'Ditangguhkan' => 'status-diproses',
+			 default => 'status-default'
+			 };
+			 echo "<tr>";
+			 echo "<td>" . htmlspecialchars($tanggal) . "</td>";
+			 echo "<td>" . htmlspecialchars($donasi['JUDUL_CAMPAIGN'] ?? '') . "</td>";
+			 echo "<td>" . formatRupiah($donasi['JUMLAH_DONASI'] ?? 0) . "</td>";
+			 echo "<td><span class='status-badge {$status_class}'>" . htmlspecialchars($status) . "</span></td>";
 
-                    <div class="info-box">
-                        <strong>💡 Tip:</strong> Untuk full campaign list, gunakan report feature di dashboard donatur.
-                    </div>
-                </div>
-            </div>
+                            // BARIS YANG DIMODIFIKASI: Kolom Aksi
+ 							echo "<td>";
+                            // Tombol Edit (arahkan ke halaman edit donasi)
+                            echo "<a href='edit_donasi.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#ffc107;color:#333;margin-right:5px;'>Edit</a>";
+                            // Tombol Hapus (arahkan ke controller hapus, gunakan konfirmasi JS)
+                            echo "<a href='../controller/hapus_donasiController.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#dc3545;margin-right:5px;' onclick='return confirm(\"Apakah Anda yakin ingin menghapus donasi ini? Aksi ini tidak dapat dibatalkan.\");'>Hapus</a>";
+                            // Tombol Lihat Detail (menggantikan link Lihat ke detail campaign)
+                        //    echo "<a href='detail_donasi.php?id_donasi=" . urlencode($donasi['ID_DONASI'] ?? '') . "' class='btn-laporan' style='background:#007bff;'>Detail</a>";
+                        //    echo "</td>";
+ 
+                            echo "</tr>";
+ }
+ }
+ ?>
+ </tbody>
+ </table>
+ </div>
 
-            <!-- Quick Stats -->
-            <div class="card">
-                <div class="card-header">
-                    📊 Quick Stats
-                </div>
-                <div class="card-body">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <div style="color: #999; font-size: 12px; margin-bottom: 5px;">Total Campaigns</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #333;"><?php echo $stats['TOTAL_CAMPAIGNS']; ?></div>
-                        </div>
-                        <div>
-                            <div style="color: #999; font-size: 12px; margin-bottom: 5px;">Total Donaturs</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #333;"><?php echo $stats['TOTAL_DONATURS']; ?></div>
-                        </div>
-                        <div>
-                            <div style="color: #999; font-size: 12px; margin-bottom: 5px;">Total Transaksi</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #333;"><?php echo $stats['TOTAL_DONATIONS']; ?></div>
-                        </div>
-                        <div>
-                            <div style="color: #999; font-size: 12px; margin-bottom: 5px;">Avg per Donasi</div>
-                            <div style="font-size: 14px; font-weight: bold; color: #667eea;">
-                                <?php echo number_format($stats['AVG_AMOUNT'], 0); ?>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div style="margin-top: 30px;">
-                        <h4 style="font-size: 13px; color: #999; margin-bottom: 10px; text-transform: uppercase;">Database Health</h4>
-                        <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; color: #388e3c; font-size: 13px;">
-                            ✓ Connected
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+		<!-- LAPORAN PENGGUNAAN DANA (TRANSPARANSI) -->
+		<div class="donasi-box" style="margin-top:18px;">
+			<h3 class="table-title">Laporan Penggunaan Dana (Transparansi)</h3>
+			<div id="reportsList">
+				<?php
+				if (empty($laporan_list)) {
+					echo "<p style='color:#999;text-align:center;'>Belum ada laporan penggunaan dana</p>";
+				} else {
+					foreach ($laporan_list as $laporan) {
+						$tanggal = !empty($laporan['TANGGAL_GENERATE']) && strtotime($laporan['TANGGAL_GENERATE']) !== false 
+							? date('Y-m-d', strtotime($laporan['TANGGAL_GENERATE'])) 
+							: '-';
+						$deskripsi = htmlspecialchars($laporan['ISI_LAPORAN'] ?? '');
+						if (strlen($deskripsi) > 150) {
+							$deskripsi = substr($deskripsi, 0, 150) . '…';
+						}
+						echo "<div class='report-card'>";
+						echo "<div style='display:flex;justify-content:space-between;align-items:start;'>";
+						echo "<div>";
+						echo "<h4>" . htmlspecialchars($laporan['JUDUL_LAPORAN'] ?? '') . "</h4>";
+						echo "<p class='muted'>" . htmlspecialchars($tanggal) . " • " . htmlspecialchars($laporan['JUDUL_CAMPAIGN'] ?? '') . "</p>";
+						echo "</div>";
+						echo "<div style='text-align:right;'>";
+						echo "<div style='font-size:1.1rem;font-weight:600;color:#2c5f2d;'>" . formatRupiah($laporan['TOTAL_DANA_TERKUMPUL'] ?? 0) . "</div>";
+						echo "<button class='btn-laporan' onclick='openReport(" . intval($laporan['ID_LAPORAN']) . ")' style='margin-top:8px;'>Lihat Detail</button>";
+						echo "</div>";
+						echo "</div>";
+						echo "<p style='margin:10px 0 0 0;color:#666;'>" . $deskripsi . "</p>";
+						echo "</div>";
+					}
+				}
+				?>
+			</div>
+		</div>
+	</main>
 
-        <!-- Recent Donations -->
-        <div class="card">
-            <div class="card-header">
-                🔄 Recent Donations
-            </div>
-            <div class="card-body">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Donatur</th>
-                            <th>Campaign</th>
-                            <th class="text-right">Amount</th>
-                            <th>Tanggal</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        while ($donation = oci_fetch_assoc($stmt_recent)) {
-                            $status_class = $donation['STATUS'] === 'completed' ? 'success' : '';
-                            ?>
-                            <tr>
-                                <td>#<?php echo $donation['DONATION_ID']; ?></td>
-                                <td><?php echo htmlspecialchars($donation['DONATUR_NAME']); ?></td>
-                                <td><?php echo htmlspecialchars($donation['CAMPAIGN_NAME']); ?></td>
-                                <td class="text-right"><strong><?php echo formatRupiah($donation['AMOUNT']); ?></strong></td>
-                                <td><?php echo date('d/m/Y', strtotime($donation['DONATION_DATE'])); ?></td>
-                                <td><span class="badge <?php echo $status_class; ?>"><?php echo ucfirst($donation['STATUS']); ?></span></td>
-                            </tr>
-                        <?php
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+	<!-- FOOTER -->
+	<footer class="main-footer">
+		<p>© 2025 Masjid Al-Falah | Donasi Masjid & Amal</p>
+	</footer>
 
-        <!-- Features Info -->
-        <div style="background: white; padding: 30px; border-radius: 10px; margin-top: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <h3 style="margin-bottom: 15px; color: #333;">🎯 Fitur yang Diimplementasikan</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                <div style="border-left: 4px solid #667eea; padding-left: 15px;">
-                    <h4>✓ Trigger Donasi</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">Menghitung total donasi otomatis tiap campaign</p>
-                </div>
-                <div style="border-left: 4px solid #764ba2; padding-left: 15px;">
-                    <h4>✓ View Top 5</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">Menampilkan 5 campaign terbanyak donasi</p>
-                </div>
-                <div style="border-left: 4px solid #27ae60; padding-left: 15px;">
-                    <h4>✓ Laporan Bulanan</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">Procedure laporan donatur tiap bulan</p>
-                </div>
-                <div style="border-left: 4px solid #f39c12; padding-left: 15px;">
-                    <h4>✓ Analisis Query</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">Execution plan dan optimasi index</p>
-                </div>
-                <div style="border-left: 4px solid #e74c3c; padding-left: 15px;">
-                    <h4>✓ Optimasi Performance</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">50x lebih cepat dengan index strategy</p>
-                </div>
-                <div style="border-left: 4px solid #3498db; padding-left: 15px;">
-                    <h4>✓ Dashboard Admin</h4>
-                    <p style="color: #666; font-size: 13px; margin-top: 5px;">Monitoring real-time database</p>
-                </div>
-            </div>
+	<!-- MODAL LAPORAN -->
+	<div id="reportModal" class="modal-back">
+		<div class="modal">
+			<header class="modal-head">
+				<h3 id="modalTitle">Detail Laporan</h3>
+				<button class="close" id="closeModal">&times;</button>
+			</header>
+			<div class="modal-body">
+				<p class="muted" id="modalDate">Tanggal: —</p>
+				<p id="modalDesc" style="margin-top:10px;">Deskripsi laporan...</p>
+				<div class="report-details">
+					<div><strong>Total Dana Terkumpul:</strong> <span id="modalAmount">Rp 0</span></div>
+					<div><strong>Campaign:</strong> <span id="modalCampaign">-</span></div>
+				</div>
+			</div>
+			<footer class="modal-foot">
+				<button class="btn-laporan" id="modalCloseBtn">Tutup</button>
+			</footer>
+		</div>
+	</div>
 
-            <div style="margin-top: 20px; background: #f0f4ff; padding: 15px; border-radius: 5px;">
-                <p style="color: #555; font-size: 13px;">
-                    📖 <strong>Dokumentasi lengkap:</strong> Buka file <code>README_FEATURES.md</code> untuk panduan detail.
-                </p>
-            </div>
-        </div>
-    </div>
+	<script>
+		const modal = document.getElementById('reportModal');
+		const modalTitle = document.getElementById('modalTitle');
+		const modalDate = document.getElementById('modalDate');
+		const modalDesc = document.getElementById('modalDesc');
+		const modalAmount = document.getElementById('modalAmount');
+		const modalCampaign = document.getElementById('modalCampaign');
 
-    <?php
-    oci_free_statement($stmt_stats);
-    oci_free_statement($stmt_campaigns);
-    oci_free_statement($stmt_recent);
-    oci_close($conn);
-    ?>
+		function formatRupiah(n) {
+			if (!n) return 'Rp 0';
+			return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+		}
+
+		function openReport(id) {
+			// Ambil data laporan dari PHP (embedded di HTML atau via fetch)
+			const laporanData = [
+				<?php
+				$laporan_entries = [];
+				foreach ($laporan_list as $laporan) {
+					$entry = "{";
+					$entry .= "id: " . intval($laporan['ID_LAPORAN']) . ",";
+					$entry .= "title: '" . addslashes(htmlspecialchars($laporan['JUDUL_LAPORAN'] ?? '')) . "',";
+					$entry .= "date: '" . (date('Y-m-d', strtotime($laporan['TANGGAL_GENERATE'] ?? ''))) . "',";
+					$entry .= "description: '" . addslashes(htmlspecialchars(substr($laporan['ISI_LAPORAN'] ?? '', 0, 500))) . "',";
+					$entry .= "amount: " . floatval($laporan['TOTAL_DANA_TERKUMPUL'] ?? 0) . ",";
+					$entry .= "campaign: '" . addslashes(htmlspecialchars($laporan['JUDUL_CAMPAIGN'] ?? '')) . "'";
+					$entry .= "}";
+					$laporan_entries[] = $entry;
+				}
+				echo implode(",", $laporan_entries);
+				?>
+			];
+
+			const r = laporanData.find(x => x.id === id);
+			if (!r) return alert('Laporan tidak ditemukan');
+
+			modalTitle.innerText = r.title;
+			modalDate.innerText = 'Tanggal: ' + r.date;
+			modalDesc.innerText = r.description;
+			modalAmount.innerText = formatRupiah(r.amount);
+			modalCampaign.innerText = r.campaign;
+
+			modal.classList.add('show');
+		}
+
+		function closeReport() {
+			modal.classList.remove('show');
+		}
+
+		document.getElementById('closeModal').addEventListener('click', closeReport);
+		document.getElementById('modalCloseBtn').addEventListener('click', closeReport);
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeReport();
+		});
+	</script>
 </body>
 </html>
+
+<?php
+oci_close($conn);
+?>

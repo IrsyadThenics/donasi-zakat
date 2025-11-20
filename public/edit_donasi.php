@@ -40,7 +40,7 @@ if ($stmt_cek) {
 }
 
 if (!$id_donasi || !$id_donatur) {
-    header('Location: dashboard_donatur.php'); // Redirect jika ID tidak valid
+    header('Location: edit_donasi-penerima.php'); // Redirect jika ID tidak valid
     exit;
 }
 
@@ -223,7 +223,7 @@ $current_pesan = isset($_POST['pesan']) ? htmlspecialchars($_POST['pesan']) : ($
             </form>
         <?php else: ?>
             <p class="message error">Data donasi tidak dapat dimuat.</p>
-            <a href="dashboard_donatur.php" class="btn" style="background:#6c757d">Kembali ke Dashboard</a>
+            <a href="edit_donasi-penerima.php" class="btn" style="background:#6c757d">Kembali ke Dashboard</a>
         <?php endif; ?>
     </div>
 </body>
