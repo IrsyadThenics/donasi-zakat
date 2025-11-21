@@ -1,0 +1,179 @@
+/* ================================
+   🌿 Style Utama - Donasi Masjid
+   ================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f3d2f;
+  background: #dfede4;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
+}
+
+/* ================= HEADER ================= */
+header {
+  background: #fff;
+  border-bottom: 1px solid #dfede4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #90c943;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.logo .icon {
+  font-size: 1.6rem;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  color: #2f4a2f;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.98rem;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #90c943;
+  text-decoration: underline;
+}
+
+/* ================= HERO ================= */
+main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.hero {
+  max-width: 1100px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+}
+
+.hero-text {
+  flex: 1;
+  max-width: 520px;
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #214a30;
+  margin-bottom: 18px;
+}
+
+.subtitle {
+  font-size: 1.05rem;
+  color: #2f4a2f;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.subtitle span {
+  display: block;
+  font-weight: 400;
+  color: #3d573d;
+  margin-top: 10px;
+}
+
+.hero-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-image img {
+  width: 100%;
+  max-width: 400px;
+  display: block;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.1));
+}
+
+/* ================= BUTTON ================= */
+.btn {
+  display: inline-block;
+  background: #c0ff28;
+  color: #214a30;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 14px 34px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(192, 255, 40, 0.4);
+}
+
+.btn:hover {
+  background: #a9e51f;
+  color: #f6ffea;
+  transform: translateY(-2px);
+}
+
+/* ================= FOOTER ================= */
+footer {
+  background: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 18px 10px;
+  font-size: 0.95rem;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.3px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column-reverse;
+    text-align: center;
+    gap: 40px;
+  }
+
+  .hero-text h1 {
+    font-size: 2.4rem;
+  }
+
+  .hero-image img {
+    max-width: 250px;
+  }
+
+  .nav-links {
+    gap: 20px;
+  }
+}

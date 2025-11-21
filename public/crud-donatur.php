@@ -97,16 +97,7 @@ function formatDate($dateString) {
 <body>
 
 <header>
-    <div class="nav-container">
-        <h2 style="color:#4CAF50;">Takmir</h2>
-        <ul class="nav-links">
-            <li><a href="dashboard_penerima.php">Dashboard</a></li>
-            <li><a href="crud-campaign.php">Campaign</a></li>
-            <li><a href="crud-donasi.php">Donasi</a></li>
-            <li><a class="active" href="crud-donatur.php">Donatur</a></li>
-            <li><a href="../controller/logout_penerimaController.php">Logout</a></li>
-        </ul>
-    </div>
+    
 </header>
 
 <div class="wrap">

@@ -6,7 +6,7 @@
 }
 
 body {
-  font-family: "Poppins", sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;  /* ← Menggunakan Segoe UI */;
   background-color: #f5f7f6;
   color: #1f3d2f;
   line-height: 1.5;
@@ -48,10 +48,10 @@ header {
 }
 
 .nav-links a {
-  color: #1e5128;
-  text-decoration: none;
+  color: #2f4a2f;
   font-weight: 600;
-  font-size: 0.95rem;
+  text-decoration: none;
+  font-size: 0.98rem;
   transition: all 0.3s ease;
 }
 
@@ -117,11 +117,12 @@ header {
 
 /* ============ Footer ============ */
 footer {
-  background-color: #1f3d2f;
+  background: #1f3d2f;
   color: #c0ff28;
   text-align: center;
-  padding: 14px;
-  font-size: 0.85rem;
+  padding: 22px 10px; /* ↑ lebih tinggi lagi */
+  font-size: 0.95rem;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
   letter-spacing: 0.3px;
 }
 

@@ -121,19 +121,7 @@ function rupiah($n) {
 <!-- ================= HEADER ================= -->
 
 <header>
-    <div class="nav-container">
-        <div class="logo" style="font-weight:bold; color:#2f4a2f;">
-            🕌 Manajemen Masjid
-        </div>
 
-
-    <ul class="nav-links">
-        <li><a href="index.php">Beranda</a></li>
-        <li><a href="tentang.php">Tentang</a></li>
-        <li><a href="kontak.php">Kontak</a></li>
-        <li><a href="dashboard_penerima.php" class="active">Dashboard</a></li>
-    </ul>
-</div>
 
 
 </header>
@@ -145,7 +133,7 @@ function rupiah($n) {
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-    <h3 style="margin-bottom:15px; color:#2f4a2f;">Menu Admin</h3>
+    <h3 >Menu Admin</h3>
 
     <div class="side-list">
         <a href="dashboard_penerima.php">Dashboard</a>

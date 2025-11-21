@@ -172,20 +172,7 @@ $aktivitas_list = array_slice($aktivitas_list, 0, 10);
      HEADER (SAMA KAYA BERANDA)
 ============================ -->
 <header>
-    <div class="nav-container">
-        <div class="logo">
-            <span class="icon">🕌</span>  
-            Manajemen Masjid
-        </div>
-
-        <ul class="nav-links">
-            <li><a href="index.php">Beranda</a></li>
-            <li><a href="#" class="active">Dashboard</a></li>
-            <li><a href="tentang.php">Tentang</a></li>
-            <li><a href="kontak.php">Kontak</a></li>
-            <li><a href="../controller/logoutController.php">Logout</a></li>
-        </ul>
-    </div>
+    
 </header>
 
 <!-- WRAPPER -->
@@ -201,7 +188,7 @@ $aktivitas_list = array_slice($aktivitas_list, 0, 10);
             <a href="crud-donasi.php">Kelola Donasi</a>
             <a href="crud-donatur.php">Kelola Donatur</a>
             <a href="crud-laporan.php">Kelola Laporan</a>
-            
+            <a href="../controller/logout_penerimaController.php">Logout</a>
         </div>
     </aside>
 

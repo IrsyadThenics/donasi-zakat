@@ -15,6 +15,6 @@ if (!$conn) {
     $e = oci_error();
     die("Koneksi ke database gagal: " . $e['message']);
 } else {
-     echo "Koneksi ke database berhasil!";
+     echo "";
 }
 ?>

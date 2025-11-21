@@ -1,265 +1,547 @@
+/* ========================================
+   CRUD LAPORAN CSS - GREEN THEME
+   Warna: Hijau gelap, hijau muda, putih
+   Konsisten dengan dashboard sebelumnya
+======================================== */
 
+/* RESET & BASE STYLES */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-.top-header {
-    background: #ffffff;
-    padding: 16px 28px;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.wrap {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #e5e5e5;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    min-height: 100vh;
 }
 
-.top-header .logo {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2f4a2f;
-}
-
-.top-nav a {
-    margin-left: 22px;
-    text-decoration: none;
-    font-size: 15px;
-    color: #444;
-    padding: 6px 8px;
-}
-
-.top-nav a:hover {
-    color: #2f4a2f;
-}
-
-.top-nav a.active {
-    font-weight: 700;
-    color: #4CAF50;
-}
-
-/* === LAYOUT STRUCTURE ================================================== */
-
-.container {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 22px;
-    margin-top: 20px;
-}
-
+/* ========================================
+   SIDEBAR STYLES - HIJAU GELAP
+======================================== */
 .sidebar {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    height: fit-content;
+    width: 280px;
+    background: linear-gradient(135deg, #1a535c 0%, #2a6b5e 100%);
+    color: white;
+    padding: 2rem 1.5rem;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
 .sidebar h3 {
-    font-size: 16px;
-    margin: 0 0 15px 0;
-    font-weight: 700;
-    color: #2f4a2f;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #4ecdc4;
+    text-align: center;
 }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.sidebar ul li {
-    margin-bottom: 10px;
-}
-
-.sidebar ul li a {
-    display: block;
-    padding: 9px 12px;
+.side-list a {
+    color: #e9ecef;
     text-decoration: none;
-    color: #333;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
-    font-size: 14px;
-    transition: 0.2s;
-}
-
-.sidebar ul li a:hover {
-    background: #e8f5e9;
-}
-
-.sidebar ul li a.active {
-    background: #4CAF50;
-    color: #fff;
-}
-
-/* ==== CONTENT =========================================================== */
-
-.content {
-    padding: 5px 2px;
-}
-
-.content h1 {
-    color: #2f4a2f;
-    margin-bottom: 4px;
-    font-size: 27px;
-    font-weight: 700;
-}
-
-.muted {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 18px;
-}
-
-/* === SUMMARY CARDS ===================================================== */
-
-.cards {
-    margin-top: 12px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 16px;
-}
-
-.card {
-    background: #ffffff;
-    padding: 18px;
-    border-radius: 12px;
-    border-left: 4px solid #4CAF50;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-.card h4 {
-    font-size: 14px;
-    margin-bottom: 6px;
-    color: #444;
-}
-
-.card .val {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2c3e2c;
-}
-
-/* === TOOLBAR ============================================================ */
-
-.toolbar {
-    margin-top: 24px;
+    transition: all 0.3s ease;
+    font-weight: 500;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
 }
 
-.right-tools {
-    display: flex;
-    gap: 10px;
+.side-list a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(5px);
 }
 
-.input-search,
-.filter-select {
-    padding: 8px 14px;
-    border-radius: 10px;
-    border: 1px solid #cfcfcf;
-    font-size: 14px;
-    background: #fafafa;
+.side-list a.active {
+    background-color: #4ecdc4;
+    color: white;
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
 }
 
-.input-search {
-    width: 230px;
+/* ========================================
+   CONTENT AREA STYLES
+======================================== */
+.content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
 }
 
-/* === PANEL =============================================================== */
+.page-head {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
 
+.page-head h1 {
+    color: #1a535c;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.page-head p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* ========================================
+   BUTTON STYLES
+======================================== */
+.btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+    justify-content: center;
+    border: none;
+}
+
+.btn.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+}
+
+.btn.secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn.secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.btn.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn.danger:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn:not(.secondary):not(.danger) {
+    background: linear-gradient(135deg, #4ecdc4 0%, #1a535c 100%);
+    color: white;
+}
+
+.btn:not(.secondary):not(.danger):hover {
+    background: linear-gradient(135deg, #1a535c 0%, #4ecdc4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 83, 92, 0.3);
+}
+
+/* ========================================
+   PANEL & TABLE STYLES
+======================================== */
 .panel {
-    margin-top: 26px;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 14px;
-    border-left: 4px solid #4CAF50;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-top: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .panel h3 {
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    color: #333;
+    color: #1a535c;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
 }
-
-/* === TABLE =============================================================== */
 
 .table-wrap {
     overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    background: white;
+}
+
+thead {
+    background: linear-gradient(135deg, #1a535c 0%, #2a6b5e 100%);
 }
 
 th {
-    background: #f5f5f5;
-    padding: 11px;
+    color: white;
+    padding: 1rem 1.5rem;
     text-align: left;
-    font-weight: 700;
-    border-bottom: 1px solid #e6e6e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+}
+
+th:first-child {
+    border-top-left-radius: 8px;
+}
+
+th:last-child {
+    border-top-right-radius: 8px;
 }
 
 td {
-    padding: 11px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+    vertical-align: middle;
 }
 
-/* === BUTTONS ============================================================= */
-
-.btn {
-    background: #4CAF50;
-    border: none;
-    color: #fff;
-    padding: 8px 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: 0.2s;
+tbody tr:hover {
+    background-color: #f8f9fa;
 }
 
-.btn:hover {
-    background: #43a047;
+/* ========================================
+   ACTION BUTTON GROUP STYLES
+======================================== */
+.action-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-.btn.small {
-    padding: 6px 10px;
-    font-size: 13px;
+/* Form inline styles */
+form[style*="display:inline"] {
+    display: inline !important;
 }
 
-.btn.secondary {
-    background: #3498db;
+/* ========================================
+   FOOTER STYLES
+======================================== */
+footer {
+    background: linear-gradient(135deg, #1a535c 0%, #2a6b5e 100%);
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    margin-left: 280px;
+    font-size: 0.9rem;
 }
 
-.btn.secondary:hover {
-    background: #2d89c8;
-}
-
-.btn.danger {
-    background: #e74c3c;
-}
-
-.btn.danger:hover {
-    background: #cf3f31;
-}
-
-/* === RESPONSIVE =========================================================== */
-
-@media (max-width: 920px) {
-    .container {
-        grid-template-columns: 1fr;
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+@media (max-width: 768px) {
+    .wrap {
+        flex-direction: column;
     }
-
-    .toolbar {
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 1rem;
+    }
+    
+    .content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    footer {
+        margin-left: 0;
+    }
+    
+    .side-list {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 0.5rem;
+    }
+    
+    .side-list a {
+        white-space: nowrap;
+        padding: 0.8rem 1rem;
+    }
+    
+    th, td {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Hide some columns on mobile */
+    td:nth-child(3), /* Campaign column */
+    th:nth-child(3) {
+        display: none;
+    }
+    
+    .action-group {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
     }
-
-    .right-tools {
+    
+    .btn.small {
         width: 100%;
-        justify-content: space-between;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel {
+        padding: 1rem;
+    }
+    
+    th, td {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Hide more columns on very small screens */
+    td:nth-child(4), /* Total Dana column */
+    th:nth-child(4) {
+        display: none;
+    }
+    
+    .panel h3 {
+        font-size: 1.3rem;
+    }
+}
+
+/* ========================================
+   ANIMATIONS & ENHANCEMENTS
+======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.panel {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+tbody tr {
+    animation: slideIn 0.4s ease-out;
+}
+
+tbody tr:nth-child(even) {
+    animation-delay: 0.1s;
+}
+
+/* Scrollbar styling */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #4ecdc4;
+    border-radius: 3px;
+}
+
+.table-wrap::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+    background: #4ecdc4;
+    border-radius: 4px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover {
+    background: #1a535c;
+}
+
+/* ========================================
+   SPECIAL STYLES FOR LAPORAN TABLE
+======================================== */
+.laporan-title {
+    font-weight: 600;
+    color: #1a535c;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.campaign-name {
+    color: #2a6b5e;
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dana-amount {
+    font-weight: 700;
+    color: #1a535c;
+    font-size: 1.1rem;
+}
+
+.laporan-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Empty state styling */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Success message styling */
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #c3e6cb;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header styling override */
+.content h1 {
+    color: #1a535c !important;
+    font-size: 2.2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.content p {
+    color: #6c757d !important;
+    font-size: 1.1rem !important;
+}
+
+/* Add button special styling */
+.add-button-container {
+    margin-bottom: 1.5rem;
+}
+
+/* Table responsive enhancements */
+@media (max-width: 768px) {
+    .laporan-title,
+    .campaign-name {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .laporan-title,
+    .campaign-name {
+        max-width: 120px;
+    }
+}
+
+/* Print styles for laporan */
+@media print {
+    .sidebar,
+    .btn,
+    footer {
+        display: none;
+    }
+    
+    .content {
+        margin-left: 0;
+        padding: 0;
+    }
+    
+    .panel {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    table {
+        border: 1px solid #ddd;
+    }
+    
+    th {
+        background: #f8f9fa !important;
+        color: #333 !important;
     }
 }

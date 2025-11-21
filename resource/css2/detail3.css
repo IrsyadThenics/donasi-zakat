@@ -1,0 +1,210 @@
+/* ===========================================
+   🌿 Style Detail Campaign - Donasi Masjid & Amal
+   =========================================== */
+
+/* Reset dasar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f3d2f;
+  background: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
+  overflow: hidden; /* tetap 1 halaman */
+}
+
+/* ===========================================
+   🕌 Header
+   =========================================== */
+header {
+  background: #fff;
+  border-bottom: 1px solid #dfede4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #90c943;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.logo .icon {
+  font-size: 1.7rem;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  color: #2f4a2f;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.98rem;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #90c943;
+  text-decoration: underline;
+}
+
+/* ===========================================
+   🌱 Main Section
+   =========================================== */
+main {
+  flex: 1;
+  background: #dfede4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+/* ===========================================
+   🕋 Detail Campaign Content
+   =========================================== */
+.detail-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 14px;
+  max-width: 1100px;
+  width: 100%;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  gap: 40px;
+  height: 480px;
+  overflow: hidden;
+}
+
+.image-section {
+  flex: 1;
+}
+
+.image-section h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #214a30;
+  margin-bottom: 10px;
+}
+
+.image-section img {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+.image-section p {
+  font-size: 0.93rem;
+  color: #2f4a2f;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* ===========================================
+   ✍️ Teks Section
+   =========================================== */
+.text-section {
+  flex: 1.2;
+  font-size: 0.92rem;
+  color: #2f4a2f;
+  line-height: 1.55;
+  overflow-y: auto;
+  max-height: 390px; /* biar teks muat tapi gak keluar box */
+  padding-right: 6px;
+}
+
+.text-section ul {
+  margin: 6px 0 10px 20px;
+}
+
+.text-section p {
+  margin-bottom: 10px;
+  text-align: justify;
+}
+
+.btn {
+  display: inline-block;
+  background: #c0ff28;
+  color: #214a30;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 12px 28px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(192, 255, 40, 0.4);
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #a9e51f;
+  color: #f6ffea;
+  transform: translateY(-2px);
+}
+
+/* ===========================================
+   🌙 Footer
+   =========================================== */
+footer {
+  background: #1f3d2f;
+  color: #c0ff28;
+  text-align: center;
+  padding: 20px 10px;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ===========================================
+   📱 Responsive
+   =========================================== */
+@media (max-width: 960px) {
+  body {
+    overflow-y: auto;
+  }
+
+  .detail-container {
+    flex-direction: column;
+    height: auto;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .image-section img {
+    max-width: 280px;
+  }
+
+  .text-section {
+    max-height: none;
+    overflow: visible;
+    font-size: 0.9rem;
+  }
+}
